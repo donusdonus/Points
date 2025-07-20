@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Project/Points/Example/build/cmake_install.cmake",
+		"C:/Project/Points/Example/build/Points/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
