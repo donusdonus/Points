@@ -1,3 +1,12 @@
+
+/**
+ * @file Points.h
+ * @brief Points container class for managing collections of Point objects
+ * @author Points Project
+ * @date 2025
+ * @version 1.0
+ */
+
 #ifndef __POINTS_H__
 #define __POINTS_H__
 
