@@ -174,7 +174,7 @@ void * Point::GetRawBuffer()
 }
 
 
-const size_t Point::GetByteSize()
+const size_t Point::GetByteSizeOfValue()
 {
     return _total_byte_size;
 }
@@ -183,3 +183,30 @@ const size_t Point::Count()
 {
     return _element_size;
 }
+
+bool Point::Copy(const Point src)
+{
+//    Clear();
+//    Init();
+
+    return false;
+}
+
+bool Point::AddSlot(Point point)
+{
+    
+    return true;
+}
+
+Point* Point::FindSlot(const char name[])
+{
+   
+    return nullptr;
+}
+
+bool Point::DeleteSlot(Point *point)
+{
+    
+    return false; // Point not found
+}
+

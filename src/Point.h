@@ -16,7 +16,6 @@
 
 /** @brief Base point configuration macro */
 #define BASE_POINT_CONFIG
-
 #ifdef BASE_POINT_CONFIG 
 /** @brief Include null terminator in string calculations */
 #define INCLUDE_NULL_END 1
@@ -219,7 +218,7 @@ public:
      * @brief Get the total byte size of the data
      * @return Total number of bytes allocated for data storage
      */
-    const size_t GetByteSize();
+    const size_t GetByteSizeOfValue();
 
     /* Group Management Functions */
     
@@ -227,7 +226,7 @@ public:
      * @brief Add a new slot to this point (if it's a GROUP_T)
      * @return true if successful, false if not a group or allocation failed
      */
-    bool AddSlot();
+    bool AddSlot(Point point);
     
     /**
      * @brief Find a point by name within this group
@@ -279,6 +278,8 @@ private:
      * @brief Clean up and deallocate resources
      */
     void Clear();
+
+    bool Copy(const Point src);
     
     /**
      * @brief Fill data buffer with specified byte value
