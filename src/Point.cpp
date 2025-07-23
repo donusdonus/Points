@@ -1,36 +1,42 @@
 #include "Point.h"
 
-Point::Point(isType type , const char * name,size_t numberElements = 1)
+typedef size_t (*PrintPointData)(size_t ,void *,size_t);
+size_t DISP_CHAR(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%c",((char*)data)[index]);}
+size_t DISP_INT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int8_t*)data)[index]);}
+size_t DISP_UINT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint8_t*)data)[index]);}
+size_t DISP_INT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int16_t*)data)[index]);}
+size_t DISP_UINT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint16_t*)data)[index]);}
+size_t DISP_INT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int32_t*)data)[index]);}
+size_t DISP_UINT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint32_t*)data)[index]);}
+size_t DISP_FLOAT(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((float*)data)[index]);}
+size_t DISP_DOUBLE(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((double*)data)[index]);}
+
+PrintPointData  FuncPrintValue[]   = {
+                                       nullptr,
+                                       &DISP_CHAR,
+                                       &DISP_INT8,
+                                       &DISP_UINT8,
+                                       &DISP_INT16,
+                                       &DISP_UINT16,
+                                       &DISP_INT32,
+                                       &DISP_UINT32,
+                                       &DISP_FLOAT,
+                                       &DISP_DOUBLE
+                                   };
+
+
+
+
+Point::Point(isType type , const char * name,size_t numberElements)
 {
     Init();
     SetName(name);
+    SetType(type);
     ByteCount(type,numberElements);
     ByteAllocate();
     FillEveryByteInData(0x00);
 }
 
-template <typename T>
-Point::Point(isType type,const char * name,T data)
-{
-
-    Init();
-    SetName(name);
-    ByteCount(type,1);
-    ByteAllocate();
-    FillEveryByteInData(0x00);
-    SetValue(data);
-}
-
-template <typename T>
-Point::Point(isType type,const char * name,T *data,size_t numberElements =1)
-{
-    Init();
-    SetName(name);
-    ByteCount(type,numberElements);
-    ByteAllocate();
-    FillEveryByteInData(0x00);
-    SetValue(data,numberElements);   
-}
 
 void Point::Init()
 {
@@ -38,6 +44,12 @@ void Point::Init()
     _data = nullptr;
     _next = nullptr;
     _previous = nullptr;
+    _group = nullptr;
+}
+
+void Point::SetType(isType type)
+{
+    _type = type;
 }
 
 void Point::Clear()
@@ -47,7 +59,7 @@ void Point::Clear()
 
     if(_data != nullptr)
     {
-        FillEveryByteInData(0xFF);
+        //FillEveryByteInData(0xFF);
         free(_data);
         _data = nullptr;
     }
@@ -128,44 +140,6 @@ void Point::FillEveryByteInData(uint8_t mark)
         memset(_data,mark,_total_byte_size);
 }
 
-template<typename T>
-bool Point::SetValue(T data)
-{
-    return SetValue(&data,1);
-}
-
-template<typename T>
-bool Point::SetValue(T *data,size_t size = 1)
-{
-    if(GetTypeInfo().canWrite == false) return false;
-
-    if(_total_byte_size < (sizeof(T)*size)) return false;
-
-    if(_data == nullptr) return false;
-
-    if(data == nullptr) return false;
-
-    memcpy(_data,data,sizeof(T)*size);
-
-    return true;
-}
-
-template<typename T>
-T Point::GetValue()
-{
-    T var{} ;
-    if(_data == nullptr) return var;
-    return *((T*)_data);
-}
-
-template<typename T>
-T Point::GetValue(size_t index)
-{
-    T var{} ;
-    if(index >= _element_size) return var;
-    if(_data == nullptr) return var;
-    return ((T*)_data)[index];
-}
 
 void * Point::GetRawBuffer()
 {
@@ -174,7 +148,7 @@ void * Point::GetRawBuffer()
 }
 
 
-const size_t Point::GetByteSizeOfValue()
+const size_t Point::GetByteSize()
 {
     return _total_byte_size;
 }
@@ -184,29 +158,131 @@ const size_t Point::Count()
     return _element_size;
 }
 
-bool Point::Copy(const Point src)
+const isType Point::GetType()
 {
-//    Clear();
-//    Init();
-
-    return false;
+    return _type;
 }
+
+
+bool Point::Copy(Point *src)
+{
+
+    if(src == nullptr) return false;
+    if(src->GetRawBuffer() == nullptr) return false;
+
+    /* try new buffer */
+    if(_data != nullptr) 
+    {
+        FillEveryByteInData(0xFF);
+        free(_data);
+        _data = nullptr;
+    }
+
+    if(
+        SetName(src->GetName()) == false
+    ) return false;
+
+    SetType(src->GetType());
+    ByteCount(_type,src->Count());
+
+    if(
+        ByteAllocate() == false
+      ) return false;
+
+/*
+    if(
+        SetValue<uint8_t>((uint8_t*)src->GetRawBuffer(),src->GetByteSize()) == false
+      ) return false;
+*/
+
+    memcpy(_data,src->GetRawBuffer(),src->GetByteSize());
+
+    return true;
+}
+
+/* Issue  (MAX_BUFFER_PRINT - used) < -1   undefined behavior */
+const char * Point::DisplayContext()
+{
+    size_t used = 0;
+    
+    memset(PrintOut,'\0',MAX_BUFFER_PRINT);
+
+    used += snprintf(PrintOut + used,MAX_BUFFER_PRINT - used,"%s %s = ",GetTypeInfo().name,GetName());
+
+    if(FuncPrintValue[GetType()] != nullptr)
+    {
+        for(int n = 0 ; n < Count() ; n++)
+        {
+            used += FuncPrintValue[GetType()](used,_data,n);
+        }
+    }
+
+    used += snprintf(PrintOut+used,MAX_BUFFER_PRINT - used,"\r");
+
+    return PrintOut;
+}
+
 
 bool Point::AddSlot(Point point)
 {
+    if( _type != isType::GROUP_T ) return false;
+
+    Point *NewPoint = (Point*)malloc(sizeof(Point));
+   
+    if(NewPoint == nullptr) return false;
+
+    NewPoint->Init();
+    if(NewPoint->Copy(&point) == false) return false;
+
+    Point **Cursor = nullptr;
+
+    Cursor = &_group;
     
+    while(*Cursor != nullptr)
+    {
+        Cursor = &((*Cursor)->_next);
+    }
+
+    *Cursor = NewPoint;
+
     return true;
 }
 
 Point* Point::FindSlot(const char name[])
 {
-   
+    Point *Cursor  = _group;
+
+    while (Cursor != nullptr )
+    {
+        if(strcmp(Cursor->GetName(),name) == 0) 
+                return Cursor; 
+        Cursor = Cursor->_next;
+        /* code */
+    }
+    
     return nullptr;
 }
 
 bool Point::DeleteSlot(Point *point)
 {
-    
+    if (point == nullptr) return false;
+    if (_type != isType::GROUP_T) return false;
+    Point **Cursor = &_group;
+
+    while (*Cursor != nullptr)
+    {
+        if (*Cursor == point)
+        {
+            Point *ToDelete = *Cursor;
+            *Cursor = ToDelete->_next;
+            ToDelete->Clear();
+            free(ToDelete);
+            return true;
+        }
+
+        Cursor = &((*Cursor)->_next);
+    }
+
     return false; // Point not found
 }
 

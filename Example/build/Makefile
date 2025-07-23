@@ -129,17 +129,17 @@ app/fast:
 .PHONY : app/fast
 
 #=============================================================================
-# Target rules for targets named Points
+# Target rules for targets named Point
 
 # Build rule for target.
-Points: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Points
-.PHONY : Points
+Point: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Point
+.PHONY : Point
 
 # fast build rule for target.
-Points/fast:
-	$(MAKE) $(MAKESILENT) -f Points\CMakeFiles\Points.dir\build.make Points/CMakeFiles/Points.dir/build
-.PHONY : Points/fast
+Point/fast:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\Point.dir\build.make Point/CMakeFiles/Point.dir/build
+.PHONY : Point/fast
 
 main.obj: main.cpp.obj
 .PHONY : main.obj
@@ -173,7 +173,7 @@ help:
 	@echo ... depend
 	@echo ... edit_cache
 	@echo ... rebuild_cache
-	@echo ... Points
+	@echo ... Point
 	@echo ... app
 	@echo ... main.obj
 	@echo ... main.i

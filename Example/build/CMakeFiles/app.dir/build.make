@@ -95,7 +95,7 @@ app_EXTERNAL_OBJECTS =
 
 app.exe: CMakeFiles/app.dir/main.cpp.obj
 app.exe: CMakeFiles/app.dir/build.make
-app.exe: Points/libPoints.a
+app.exe: Point/libPoint.a
 app.exe: CMakeFiles/app.dir/linkLibs.rsp
 app.exe: CMakeFiles/app.dir/objects1.rsp
 app.exe: CMakeFiles/app.dir/link.txt

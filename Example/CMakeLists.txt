@@ -22,7 +22,7 @@ set(CMAKE_BUILD_TYPE Debug)
 #FetchContent_MakeAvailable(freertos)
 
 # ✅ เพิ่มไลบรารี mountkit
-add_subdirectory(../src ${CMAKE_CURRENT_BINARY_DIR}/Points)
+add_subdirectory(../src ${CMAKE_CURRENT_BINARY_DIR}/Point)
 
 # ✅ สร้าง executable
 add_executable(app main.cpp)
@@ -47,6 +47,6 @@ add_executable(app main.cpp)
 # ✅ link libraries
 target_link_libraries(app
   PRIVATE
-  Points
+  Point
 #  freertos_kernel
 )

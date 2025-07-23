@@ -21,8 +21,10 @@
 #define INCLUDE_NULL_END 1
 /** @brief Maximum buffer size for printing operations */
 #define MAX_BUFFER_PRINT 128
+static char PrintOut[MAX_BUFFER_PRINT];
 /** @brief Maximum characters for point names including null terminator */
 #define MAX_CHAR_NAME 16 + INCLUDE_NULL_END
+
 #endif
 
 /**
@@ -60,7 +62,6 @@ enum isType
 struct TypeInfo {
     const char* name;       /**< Human-readable type name */
     size_t size;            /**< Size in bytes of the data type */
-    const char* format;     /**< Printf format specifier for this type */
     bool canRead;           /**< Whether this type supports read operations */
     bool canWrite;          /**< Whether this type supports write operations */
 };
@@ -77,18 +78,21 @@ struct TypeInfo {
  * This lookup table provides metadata for each type defined in isType enum.
  * Used internally for type validation, size calculations, and formatting.
  */
+
+
+
 static const TypeInfo SchematicPoint[] = 
 {
-    {"GROUP" , sizeof(NULL)     ,"%s"   ,true,false},  /**< Group type - read only */
-    {"CHAR"  , sizeof(char)     ,"%c"   ,true,true},   /**< Character type */
-    {"INT8"  , sizeof(int8_t)   ,"%d"   ,true,true},   /**< 8-bit signed integer */
-    {"UINT8" , sizeof(uint8_t)  ,"%u"   ,true,true},   /**< 8-bit unsigned integer */
-    {"INT16" , sizeof(int16_t)  , "%d"  ,true,true},   /**< 16-bit signed integer */
-    {"UINT16", sizeof(uint16_t) ,"%u"   ,true,true},   /**< 16-bit unsigned integer */
-    {"INT32" , sizeof(int32_t)  , "%d"  ,true,true},   /**< 32-bit signed integer */
-    {"UINT32", sizeof(uint32_t) ,"%u"   ,true,true},   /**< 32-bit unsigned integer */
-    {"FLOAT" , sizeof(float)    ,"%.3f" ,true,true},   /**< Single precision float */
-    {"DOUBLE", sizeof(double)   ,"%.3f" ,true,true}    /**< Double precision float */
+    {"GROUP" , sizeof(NULL)     ,true,false},  /**< Group type - read only */
+    {"CHAR"  , sizeof(char)     ,true,true},   /**< Character type */
+    {"INT8"  , sizeof(int8_t)   ,true,true},   /**< 8-bit signed integer */
+    {"UINT8" , sizeof(uint8_t)  ,true,true},   /**< 8-bit unsigned integer */
+    {"INT16" , sizeof(int16_t)  ,true,true},   /**< 16-bit signed integer */
+    {"UINT16", sizeof(uint16_t) ,true,true},   /**< 16-bit unsigned integer */
+    {"INT32" , sizeof(int32_t)  ,true,true},   /**< 32-bit signed integer */
+    {"UINT32", sizeof(uint32_t) ,true,true},   /**< 32-bit unsigned integer */
+    {"FLOAT" , sizeof(float)    ,true,true},   /**< Single precision float */
+    {"DOUBLE", sizeof(double)   ,true,true}    /**< Double precision float */
 };
 
 /**
@@ -119,7 +123,7 @@ public:
      * @param numberElements Number of elements to allocate (default: 1)
      */
     Point(isType type,const char * name,size_t numberElements);
-
+   
     /**
      * @brief Template constructor for creating a Point with initial data
      * @tparam T The C++ type of the initial data
@@ -128,7 +132,16 @@ public:
      * @param data Initial data value to store
      */
     template <typename T>
-    Point(isType type,const char * name,T data);
+    Point(isType type,const char * name,T data)
+    {
+        Init();
+        SetName(name);
+        SetType(type);
+        ByteCount(type,1);
+        ByteAllocate();
+        FillEveryByteInData(0x00);
+        SetValue(data);
+    }
 
     /**
      * @brief Template constructor for creating a Point with array data
@@ -139,8 +152,19 @@ public:
      * @param numberElements Number of elements in the array (default: 1)
      */
     template <typename T>
-    Point(isType type,const char * name,T *data,size_t numberElements = 1);
+    Point(isType type,const char * name,T *data,size_t numberElements)
+    {
+        Init();
+        SetName(name);
+        SetType(type);
+        ByteCount(type,numberElements);
+        ByteAllocate();
+        FillEveryByteInData(0x00);
+        SetValue(data,numberElements);   
+    }
 
+
+    ~Point() {Clear();}
     /**
      * @brief Set a single value in the point
      * @tparam T The C++ type of the value
@@ -148,7 +172,10 @@ public:
      * @return true if successful, false otherwise
      */
     template<typename T>
-    bool SetValue(T data);
+    bool SetValue(T data)
+    {
+        return SetValue(&data,1);
+    }    
 
     /**
      * @brief Set array values in the point
@@ -158,7 +185,21 @@ public:
      * @return true if successful, false otherwise
      */
     template<typename T>
-    bool SetValue(T *data,size_t size = 1);
+    bool SetValue(T *data,size_t size)
+    {
+        auto temp = GetTypeInfo().canWrite;
+        if(temp == false) return false;
+
+        if(_total_byte_size < (sizeof(T)*size)) return false;
+
+        if(_data == nullptr) return false;
+
+        if(data == nullptr) return false;
+
+        memcpy(_data,data,sizeof(T)*size);
+
+        return true;
+    }
 
     /**
      * @brief Get the first value from the point
@@ -166,7 +207,16 @@ public:
      * @return The value cast to type T
      */
     template<typename T>
-    T GetValue();
+    T GetValue()
+    {
+        T var{} ;
+
+        if(_data == nullptr) return var;
+
+        var = *((T*)_data);
+
+        return var;
+    }
 
     /**
      * @brief Get a value at specific index from the point
@@ -175,7 +225,13 @@ public:
      * @return The value at the specified index cast to type T
      */
     template<typename T>
-    T GetValue(size_t index);
+    T GetValue(size_t index)
+    {
+        T var{} ;
+        if(index >= _element_size) return var;
+        if(_data == nullptr) return var;
+        return ((T*)_data)[index];
+    }
 
     /**
      * @brief Get direct access to the raw data buffer
@@ -207,7 +263,12 @@ public:
      * @return TypeInfo structure containing metadata about the point's type
      */
     const TypeInfo GetTypeInfo();
+
+    const isType GetType();
+
+    bool Copy(Point *src);
     
+
     /**
      * @brief Get the number of elements in this point
      * @return Number of elements stored in the point
@@ -218,7 +279,7 @@ public:
      * @brief Get the total byte size of the data
      * @return Total number of bytes allocated for data storage
      */
-    const size_t GetByteSizeOfValue();
+    const size_t GetByteSize();
 
     /* Group Management Functions */
     
@@ -226,6 +287,7 @@ public:
      * @brief Add a new slot to this point (if it's a GROUP_T)
      * @return true if successful, false if not a group or allocation failed
      */
+
     bool AddSlot(Point point);
     
     /**
@@ -242,9 +304,10 @@ public:
      */
     bool DeleteSlot(Point *Point);
 
-    
+    const char * DisplayContext();
+    const char * DisplayValue();
 
-private:
+
     char  _name[MAX_CHAR_NAME];          /**< Point name storage */
     void* _data;                         /**< Raw data buffer */
 
@@ -252,14 +315,20 @@ private:
     size_t _total_byte_size = 0;         /**< Total allocated bytes */
 
     isType _type;                        /**< Type of data stored */
-    Point *_group;                       /**< Pointer to group members (for GROUP_T) */
-    Point *_next;                        /**< Next point in linked list */
-    Point *_previous;                    /**< Previous point (reserved for future use) */
+    Point *_group = nullptr;                       /**< Pointer to group members (for GROUP_T) */
+    Point *_next = nullptr;                        /**< Next point in linked list */
+    Point *_previous = nullptr;                    /**< Previous point (reserved for future use) */
+
+
+
+private:
 
     /**
      * @brief Initialize point members to default values
      */
     void Init();
+
+    void SetType(isType type);
     
     /**
      * @brief Calculate required bytes for given type and element count
@@ -279,8 +348,6 @@ private:
      */
     void Clear();
 
-    bool Copy(const Point src);
-    
     /**
      * @brief Fill data buffer with specified byte value
      * @param mark Byte value to fill the buffer with
