@@ -225,11 +225,18 @@ const char * Point::DisplayContext()
 
 bool Point::AddSlot(Point point)
 {
-    if( _type != isType::GROUP_T ) return false;
+    bool ret = false;
+
+    ret = point.Copy(&point);
+    if( ret == false) return false;
+
+    ret = (_type != isType::GROUP_T)? true : false;
+    if( ret == false) return false;
 
     Point *NewPoint = (Point*)malloc(sizeof(Point));
    
-    if(NewPoint == nullptr) return false;
+    ret = (NewPoint == nullptr)? true : false;
+    if(ret) return false;
 
     NewPoint->Init();
     if(NewPoint->Copy(&point) == false) return false;

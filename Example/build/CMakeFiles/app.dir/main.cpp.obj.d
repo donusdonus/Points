@@ -1,5 +1,5 @@
-CMakeFiles/app.dir/main.cpp.obj: C:\Project\Points\Example\main.cpp \
- C:/Project/Points/src/Point.h C:/msys64/mingw32/include/stdio.h \
+CMakeFiles/app.dir/main.cpp.obj: D:\Points\Example\main.cpp \
+ D:/Points/src/Point.h C:/msys64/mingw32/include/stdio.h \
  C:/msys64/mingw32/include/corecrt_stdio_config.h \
  C:/msys64/mingw32/include/corecrt.h C:/msys64/mingw32/include/_mingw.h \
  C:/msys64/mingw32/include/_mingw_mac.h \
