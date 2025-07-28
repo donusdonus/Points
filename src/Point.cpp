@@ -1,205 +1,236 @@
 #include "Point.h"
 
-typedef size_t (*PrintPointData)(size_t ,void *,size_t);
-size_t DISP_CHAR(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%c",((char*)data)[index]);}
-size_t DISP_INT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int8_t*)data)[index]);}
-size_t DISP_UINT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint8_t*)data)[index]);}
-size_t DISP_INT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int16_t*)data)[index]);}
-size_t DISP_UINT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint16_t*)data)[index]);}
-size_t DISP_INT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int32_t*)data)[index]);}
-size_t DISP_UINT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint32_t*)data)[index]);}
-size_t DISP_FLOAT(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((float*)data)[index]);}
-size_t DISP_DOUBLE(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((double*)data)[index]);}
-
-PrintPointData  FuncPrintValue[]   = {
-                                       nullptr,
-                                       &DISP_CHAR,
-                                       &DISP_INT8,
-                                       &DISP_UINT8,
-                                       &DISP_INT16,
-                                       &DISP_UINT16,
-                                       &DISP_INT32,
-                                       &DISP_UINT32,
-                                       &DISP_FLOAT,
-                                       &DISP_DOUBLE
-                                   };
-
-
-
-
-Point::Point(isType type , const char * name,size_t numberElements)
+/* TEST PASS */
+bool Point::ByteAllocate(isMemory memtype,size_t numberelements)
 {
-    Init();
-    SetName(name);
-    SetType(type);
-    ByteCount(type,numberElements);
-    ByteAllocate();
-    FillEveryByteInData(0x00);
-}
+    _prop.DataAllocated = false;
+    monitor = true;
 
+    _data.size = SchematicPoint[_prop.VarType].element_size * numberelements;
 
-void Point::Init()
-{
-    _type = isType::GROUP_T;
-    _data = nullptr;
-    _next = nullptr;
-    _previous = nullptr;
-    _group = nullptr;
-}
-
-void Point::SetType(isType type)
-{
-    _type = type;
-}
-
-void Point::Clear()
-{
-
-    memset(_name,0xFF,MAX_CHAR_NAME);
-
-    if(_data != nullptr)
+    monitor = (_data.value != nullptr);
+    if(monitor)
     {
-        //FillEveryByteInData(0xFF);
-        free(_data);
-        _data = nullptr;
+        free(_data.value);
     }
 
-    if(_next != nullptr)
+    _data.value = nullptr;
+
+    switch (memtype)
     {
-        free(_next);
-        _next = nullptr;
-    }
-    
-    if(_previous != nullptr)
-    {
-        free(_previous);
-        _previous = nullptr;
+        case isMemory::RAM : 
+            _data.value = (uint8_t*)_SECTOR_RAM_(_data.size);  
+        break;
+        case isMemory::PSRAM : 
+            _data.value = (uint8_t*)_SECTOR_PSRAM_(_data.size);
+        break;
+        case isMemory::SPARE_1:
+            _data.value = (uint8_t*)_SECTOR_SPARE1_(_data.size);
+        break;
+        case isMemory::SPARE_2:
+            _data.value = (uint8_t*)_SECTOR_SPARE1_(_data.size);
+        break;    
     }
 
-    if(_group != nullptr)
-    {
-        free(_group);
-        _group= nullptr;
-    }
+    monitor = (_data.value != nullptr);
+    if(!monitor)
+        return monitor;
 
-    
+    memset(_data.value,MARK_FREE_MEMORY,_data.size);
+
+    _prop.DataAllocated = true;
+    return monitor;
 }
 
-void Point::ByteCount(isType type,size_t numberElements)
+bool Point::GetBuffer(RawMemory *src)
 {
-    _element_size = numberElements;
-    _total_byte_size = SchematicPoint[type].size * _element_size;
+    monitor = true;
+
+    monitor = (_data.value != nullptr) ? true : false;
+    if(!monitor) 
+        return monitor;
+    
+    src = &_data;
+
+    return monitor;
 }
 
-bool Point::ByteAllocate()
+/* TEST PASS */
+const size_t Point::Count()
 {
-    if(_total_byte_size <= 0) return false;
-    
-    if(_data != nullptr)
-        free(_data);
-
-    _data = nullptr;
-
-    _data = malloc(_total_byte_size);
-
-    return (_data != nullptr)? true : false ;
+    return _data.size/SchematicPoint[_prop.VarType].element_size;
 }
 
-bool Point::SetName(const char *name)
+/* TEST PASS */
+bool Point::SetName(const char * name)
 {
-    if((MAX_CHAR_NAME - 1) < strlen(name))
-        return false;
-    
-    memcpy(&_name[0],name,strlen(name));
+    _prop.NameAllocated = 0;
+    monitor = true;
 
-    _name[MAX_CHAR_NAME-1] = '\0';
+    if(_name.value != nullptr)
+    {
+        memset(_name.value,0xFF,_name.size);
+        free(_name.value);
+        _name.value = nullptr;
+    }
 
-    return true;
+    _name.size = strlen(name) + 1;
+
+     switch (_prop.MemType)
+    {
+        case isMemory::RAM : 
+            _name.value = (uint8_t*)_SECTOR_RAM_(_name.size);  
+        break;
+        case isMemory::PSRAM : 
+            _name.value = (uint8_t*)_SECTOR_PSRAM_(_name.size);
+        break;
+        case isMemory::SPARE_1:
+            _name.value = (uint8_t*)_SECTOR_SPARE1_(_name.size);
+        break;
+        case isMemory::SPARE_2:
+            _name.value = (uint8_t*)_SECTOR_SPARE1_(_name.size);
+        break;    
+    }
+
+    monitor = (_name.value != nullptr);
+    if(!monitor)
+        return monitor;
+
+    if(monitor)
+    {
+        memcpy(_name.value,name,_name.size -1);
+        _name.value[_name.size-1] = MARK_CHAR_NULL;
+        _prop. NameAllocated = 1;
+    }
+    return monitor;
 }
 
 const char * Point::GetName()
 {
-    return _name;
-}
-
-const TypeInfo Point::GetTypeInfo()
-{
-    return SchematicPoint[_type];
-}
-
-
-void Point::ClearValue()
-{
-    FillEveryByteInData(0x00);
-}
-
-
-void Point::FillEveryByteInData(uint8_t mark)
-{
-    if(_data != nullptr)
-        memset(_data,mark,_total_byte_size);
-}
-
-
-void * Point::GetRawBuffer()
-{
-    if(_data == nullptr) return nullptr;
-    return _data;
-}
-
-
-const size_t Point::GetByteSize()
-{
-    return _total_byte_size;
-}
-
-const size_t Point::Count()
-{
-    return _element_size;
+    return (char*)_name.value;
 }
 
 const isType Point::GetType()
 {
-    return _type;
+    return _prop.VarType;
 }
 
-
-bool Point::Copy(Point *src)
+const size_t Point::GetTotalByteSize()
 {
+    return sizeof(Point) + _name.size + _data.size ;
+}
 
-    if(src == nullptr) return false;
-    if(src->GetRawBuffer() == nullptr) return false;
+const size_t Point::GetValueByteSize()
+{
+    return _data.size ;
+}
 
-    /* try new buffer */
-    if(_data != nullptr) 
+const FlagMark Point::GetFlagMark()
+{
+    return  _prop;
+}
+
+void Point::Remove()
+{
+    /* Clear All Memory  */
+
+    /* _data remove memory */
+    if(_data.value != nullptr)
     {
-        FillEveryByteInData(0xFF);
-        free(_data);
-        _data = nullptr;
+        memset(_data.value,MARK_FREE_MEMORY,_data.size);
+        memset(&_data.size,MARK_FREE_MEMORY,sizeof(_data.size));
+        free(_data.value);
+        _data.value = nullptr;
+    }
+    
+    /* _name remove memory */
+    if(_name.value != nullptr)
+    {
+        memset(_name.value,MARK_FREE_MEMORY,_name.size);
+        memset(&_name.size,MARK_FREE_MEMORY,sizeof(_name.size));
+        free(_name.value);
+        _name.value = nullptr;
     }
 
-    if(
-        SetName(src->GetName()) == false
-    ) return false;
+    if(_ptr_home != nullptr)
+        _ptr_home = nullptr;
 
-    SetType(src->GetType());
-    ByteCount(_type,src->Count());
-
-    if(
-        ByteAllocate() == false
-      ) return false;
-
-/*
-    if(
-        SetValue<uint8_t>((uint8_t*)src->GetRawBuffer(),src->GetByteSize()) == false
-      ) return false;
-*/
-
-    memcpy(_data,src->GetRawBuffer(),src->GetByteSize());
-
-    return true;
+    memset(&_prop,MARK_FREE_MEMORY,sizeof(_prop));
 }
 
+
+/*********************  HERE *********************************/
+
+/* TEST PASS */
+/* Creat GROUP_T Only */
+Point::Point(const char * name,isMemory memtype)
+{
+    /* Init Pointer Branch */
+    _ptr_home = nullptr;
+    _ptr_next = nullptr;
+
+    /* Init Prop */
+    _prop.Value = 0;
+    _prop.MemType = memtype;
+    _prop.VarType = isType::VAR_GROUP;
+    
+    ByteAllocate(_prop.MemType,SchematicPoint[_prop.VarType].element_size);
+    SetName(name);
+}
+
+/* TEST PASS */
+Point::Point(
+                isType type,
+                const char * name,
+                size_t numberElements,
+                isMemory memtype
+            )
+{
+          /* Init Pointer Branch */
+        _ptr_home = nullptr;
+        _ptr_next = nullptr;
+
+        /* Init Prop */
+        _prop.Value = 0;
+        _prop.MemType = memtype;
+        _prop.VarType = type;
+        
+        _name.size = 0;
+
+        ByteAllocate(_prop.MemType,numberElements); 
+        SetName(name);
+}
+
+Point::Point(
+                isType type , 
+                const char * name,
+                uint8_t *addr,
+                size_t numberElements,
+                isMemory memtype 
+            )
+{
+    monitor = true;
+    /* Init Pointer Branch */
+    _ptr_home = nullptr;
+    _ptr_next = nullptr;
+ 
+    /* Init Prop */
+    _prop.MemType = memtype;
+    _prop.VarType = type;
+    _prop.DataAllocated = (addr != nullptr);
+    
+    //ByteAllocate(_prop.MemType,numberElements);  
+    _name.size = 0;
+
+    _data.value = addr ; 
+    _data.size = numberElements;
+
+
+    SetName(name);
+}
+
+
+/* TEST PASS */
 /* Issue  (MAX_BUFFER_PRINT - used) < -1   undefined behavior */
 const char * Point::DisplayContext()
 {
@@ -207,13 +238,13 @@ const char * Point::DisplayContext()
     
     memset(PrintOut,'\0',MAX_BUFFER_PRINT);
 
-    used += snprintf(PrintOut + used,MAX_BUFFER_PRINT - used,"%s %s = ",GetTypeInfo().name,GetName());
+    used += snprintf(PrintOut + used,MAX_BUFFER_PRINT - used,"%s %s = ",SchematicPoint[_prop.VarType].name,GetName());
 
-    if(FuncPrintValue[GetType()] != nullptr)
+    if(FuncPrintValue[_prop.VarType] != nullptr)
     {
         for(int n = 0 ; n < Count() ; n++)
         {
-            used += FuncPrintValue[GetType()](used,_data,n);
+            used += FuncPrintValue[_prop.VarType](used,_data.value,n);
         }
     }
 
@@ -222,24 +253,237 @@ const char * Point::DisplayContext()
     return PrintOut;
 }
 
-
-bool Point::AddSlot(Point point)
+/* TEST PASS */
+const char * Point::DisplayValue(size_t index)
 {
-    bool ret = false;
+    memset(PrintOut,'\0',MAX_BUFFER_PRINT);
+    FuncPrintValue[_prop.VarType](0,_data.value,index);
+    return &PrintOut[0] ;
+}
 
-    ret = point.Copy(&point);
-    if( ret == false) return false;
+/* TEST PASS */
+Point * Point::Insert(
+                    isType type,
+                    const char * name,
+                    size_t numberElements,
+                    isMemory memtype
+                  )
+{
+    monitor = true;
 
-    ret = (_type != isType::GROUP_T)? true : false;
-    if( ret == false) return false;
+    monitor = (_prop.VarType == isType::VAR_GROUP);
+    if(!monitor)
+        return nullptr;
+
+    monitor = (type != isType::VAR_GROUP);
+    if(!monitor)
+        return nullptr;
+
+    Point *_newpoint = (Point *)malloc(sizeof(Point));
+
+    _newpoint->_ptr_home = nullptr;
+    _newpoint->_ptr_home = this;
+
+    _newpoint->_ptr_next = nullptr;
+    
+    _newpoint->_prop.Value = 0;
+    _newpoint->_prop.InGroup = true;
+    _newpoint->_prop.MemType = memtype;
+    _newpoint->_prop.VarType = type;
+
+    _newpoint->_data.size = 0;
+    _newpoint->_name.size = 0;
+
+    monitor = _newpoint->ByteAllocate(_prop.MemType,numberElements);
+    if(!monitor)
+        return nullptr;
+
+    monitor = _newpoint->SetName(name);
+    if(!monitor)
+        return nullptr;
+
+    /* add to next node */
+    Point **_cursor = &_ptr_next;
+
+    while((_cursor != nullptr) && (*_cursor != nullptr))
+    {
+            _cursor = &(*_cursor)->_ptr_next;
+    }
+
+    (*_cursor) = nullptr;
+    (*_cursor) = _newpoint;
+    
+    return (*_cursor);
+}
+
+/* TEST PASS */
+Point * Point::FindByName(const char name[])
+{
+    monitor = false;
+    
+    monitor = (_prop.VarType == isType::VAR_GROUP);
+    if(!monitor)
+        return nullptr;
+
+    Point **_cursor = &_ptr_next;
+
+    while((_cursor != nullptr) && (*_cursor != nullptr) && !monitor)
+    {
+         monitor = (strcmp((*_cursor)->GetName(),name) == 0);
+         
+         if(!monitor)
+            _cursor = &(*_cursor)->_ptr_next;
+    }
+
+    if(monitor)
+        return *_cursor;
+
+    return nullptr;
+}
+
+/* TEST PASS */
+Point * Point::FindByIndex(size_t Index)
+{
+    size_t count = 0 ;
+    monitor = false;
+
+    Point **cursor = &_ptr_next;  
+    
+    while((cursor != nullptr) && ((*cursor) != nullptr) && !monitor)
+    {
+        monitor = (count == Index);
+
+        if(!monitor)
+        {
+            cursor = &(*cursor)->_ptr_next;
+            count++;
+        }
+    }
+
+    return (*cursor); 
+}
+
+/* TEST PASS */
+Point * Point::Home(void)
+{
+    return _ptr_home;
+}
+
+int Point::GetIndex()
+{
+    int count = 0 ;
+
+    monitor = (_ptr_home != nullptr);
+    if(!monitor)
+        return -1;
+
+    Point **cursor = &(_ptr_home->_ptr_next);  
+    
+    monitor = false;
+
+    while((cursor != nullptr) && ((*cursor) != nullptr) && !monitor)
+    {
+        monitor = ( (*cursor) == this);
+
+        if(!monitor)
+        {
+            cursor = &(*cursor)->_ptr_next;
+            count++;
+        }
+    }
+
+    if(monitor)
+        return count;
+
+    return -1; 
+
+}
+
+size_t Point::GetPointCount()
+{
+    int count = 0;
+
+    monitor = (_ptr_home != nullptr);
+    if(!monitor)
+        return -1;
+
+    Point **cursor = &(_ptr_home->_ptr_next);  
+
+    while((cursor != nullptr) && ((*cursor) != nullptr))
+    {
+        cursor = &(*cursor)->_ptr_next;
+        count++;
+    }
+
+    return count; 
+}
+
+/* WAIT EDIT */
+bool Point::DeleteByName(const char name[])
+{
+    monitor = true;
+
+    Point * p = FindByName(name);
+
+    monitor = (p != nullptr);
+    if(!monitor)
+        return false;
+
+    int index = p->GetIndex();
+    
+    monitor = (index != -1);
+    if(!monitor)
+        return false;
+
+    monitor = DeleteByIndex(index);
+    
+    return monitor;
+}
+
+/* TEST PASS */
+bool Point::DeleteByIndex(size_t index)
+{
+    Point *prev = nullptr;
+    Point *cur = nullptr;
+
+    prev = FindByIndex(index-1);
+    cur = FindByIndex(index);
+
+    monitor = (cur != nullptr); 
+    if(!monitor)
+        return monitor;
+
+    monitor = (prev != nullptr);
+    if(monitor)
+        prev->_ptr_next = cur->_ptr_next;
+    else 
+        _ptr_next = cur->_ptr_next;
+
+
+    cur->Remove();
+    free(cur);
+
+    return true;
+}
+
+
+
+/*
+
+
+bool Point::AddSlot(const char * name,isMemory memtype = isMemory::RAM)
+{
+    Point *p = malloc()
 
     Point *NewPoint = (Point*)malloc(sizeof(Point));
    
     ret = (NewPoint == nullptr)? true : false;
-    if(ret) return false;
+    if(ret) return ret;
 
     NewPoint->Init();
-    if(NewPoint->Copy(&point) == false) return false;
+
+    ret = NewPoint->Copy(&point)? true : false;
+    if(ret == false) return ret;
 
     Point **Cursor = nullptr;
 
@@ -252,7 +496,7 @@ bool Point::AddSlot(Point point)
 
     *Cursor = NewPoint;
 
-    return true;
+    return ret;
 }
 
 Point* Point::FindSlot(const char name[])
@@ -264,7 +508,7 @@ Point* Point::FindSlot(const char name[])
         if(strcmp(Cursor->GetName(),name) == 0) 
                 return Cursor; 
         Cursor = Cursor->_next;
-        /* code */
+      
     }
     
     return nullptr;
@@ -273,17 +517,22 @@ Point* Point::FindSlot(const char name[])
 bool Point::DeleteSlot(Point *point)
 {
     if (point == nullptr) return false;
-    if (_type != isType::GROUP_T) return false;
+    if (_type != isType::VAR_GROUP) return false;
     Point **Cursor = &_group;
 
     while (*Cursor != nullptr)
     {
-        if (*Cursor == point)
+        if (strcmp((*Cursor)->GetName(),point->GetName()) == 0)
         {
-            Point *ToDelete = *Cursor;
-            *Cursor = ToDelete->_next;
-            ToDelete->Clear();
-            free(ToDelete);
+            (*Cursor)->Clear();
+            free(*Cursor);
+            *Cursor = nullptr;
+            //Point *ToDelete = *Cursor;
+            //*Cursor = ToDelete->_next;
+            //ToDelete->Clear();
+            //free(ToDelete);
+            //ToDelete = nullptr;
+
             return true;
         }
 
@@ -293,3 +542,45 @@ bool Point::DeleteSlot(Point *point)
     return false; // Point not found
 }
 
+
+
+*/
+
+/*
+bool Point::Copy(Point *src)
+{
+    monitor = true;
+
+
+    monitor = (src->GetType() != isType::VAR_GROUP) ? true : false;
+    if(!monitor) 
+        return monitor;
+
+
+    monitor = (_prop.VarType != isType::VAR_GROUP) ? true : false;
+    if(!monitor) 
+        return monitor;
+        
+
+
+    _prop = src->GetFlagMark();
+
+
+    monitor = SetName(src->GetName());
+    if(!monitor)
+        return monitor;
+
+    RawMemory *temp = nullptr;
+    monitor = src->GetBuffer(temp);
+    if(!monitor)
+        return monitor;
+
+    monitor = ByteAllocate(_prop.MemType,src->GetValueByteSize()); 
+    if(!monitor)
+        return monitor;
+
+    memcpy(_data.value,temp->value,_data.size);
+
+    return monitor;
+}
+*/

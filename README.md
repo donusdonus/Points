@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![C++](https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B)
+![C++](https://img.shields.io/badge/C++-11-blue.svg?style=flat&logo=c%2B%2B)
 ![CMake](https://img.shields.io/badge/CMake-3.14+-green.svg?style=flat&logo=cmake)
 ![Embedded](https://img.shields.io/badge/Embedded-MCU%20Ready-orange.svg?style=flat&logo=arduino)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)
@@ -20,19 +20,7 @@
 
 ## 🌟 Overview
 
-The **Points Library** is a modern C++ solution that revolutionizes how you handle typed data points across **Desktop Applications**, **Server Systems**, and **Embedded/MCU Platforms**. Whether you're building IoT devices, industrial controllers, data acquisition systems, or configuration managers, this library provides the foundation you need.
-
-### ✨ Why Choose Points Library?
-
-- 🛡️ **Type Safety First** - Template-based approach with compile-time type checking
-- 🚀 **Zero Dependencies** - Only uses standard C++ libraries
-- 💾 **Smart Memory** - Configurable allocation strategies (dynamic for desktop, static for MCU)
-- 📊 **Rich Data Types** - Support for primitives, arrays, and hierarchical data
-- 🌍 **Universal Platform** - Desktop, Server, MCU, Arduino, ESP32, STM32, and more
-- ⚡ **High Performance** - Optimized for both resource-rich and resource-constrained environments
-- 🔧 **Embedded Ready** - Configurable for memory-limited microcontrollers
-
----
+The **Points Library** is a C++11 solution that revolutionizes how you handle typed data points container across **Desktop Applications** and **Embedded/MCU Platforms**. Whether you're building IoT devices, industrial controllers, data acquisition systems, or configuration managers, this library provides the foundation you need.
 
 ## 🎯 Features
 
@@ -40,18 +28,18 @@ The **Points Library** is a modern C++ solution that revolutionizes how you hand
 <tr>
 <td width="50%">
 
-### 🔒 **Type Safety**
-- Template-based approach
-- Compile-time type checking
-- Runtime type validation
-- Memory-safe operations
+### 🔒 **Type Container**
+- Group Data
+- Allocate Select Memory Type
+- Base Name and Value
+- Display function
 
 </td>
 <td width="50%">
 
 ### 📦 **Data Management**
 - Multiple primitive types
-- Dynamic arrays support
+- Fix arrays support
 - Hierarchical organization
 - Configurable memory strategies
 
@@ -62,9 +50,9 @@ The **Points Library** is a modern C++ solution that revolutionizes how you hand
 
 ### 🏗️ **Architecture**
 - Header-only convenience
-- CMake build system
+- Cross Platform OS / Embedded
 - Modular design
-- Clean API interface
+- Upgrade Protocol base
 
 </td>
 <td width="50%">
@@ -91,35 +79,24 @@ The Points Library is **specifically designed** to work seamlessly on resource-c
 
 | 🏷️ Platform Category | 🔧 Examples | 💾 Memory Strategy | 🚀 Performance |
 |---------------------|-------------|-------------------|----------------|
-| **Desktop/Server** | Windows, Linux, macOS | Dynamic allocation | Full features |
-| **Arduino** | Uno, Mega, Nano | Static allocation | Optimized |
-| **ESP32/ESP8266** | WiFi modules | Hybrid allocation | Real-time ready |
-| **STM32** | ARM Cortex-M series | Static allocation | Ultra-fast |
-| **AVR** | ATmega, ATtiny | Static allocation | Minimal footprint |
-| **ARM** | Raspberry Pi Pico | Configurable | Balanced |
+| **Desktop** |  |  |  |
+| **Arduino** |  |  |  |
+| **ESP32/ESP8266** |  |  |  |
+| **STM32** | |  |  |
+| **AVR** |  |  |  |
+| **ARM** |  | |  |
 
 </div>
 
-### ⚙️ Embedded Configuration
-
-For embedded systems, enable the embedded build mode:
+### ⚙️ Point.h Configuration
 
 ```cpp
 // In your main header or build configuration
-#define EMBEDDED_BUILD              // Enable embedded optimizations
-#define POINTS_MAX_POINTS 16        // Maximum number of points (default: 32)
-#define POINTS_MAX_BUFFER_SIZE 128  // Maximum buffer per point (default: 512)
-#define POINTS_NO_DYNAMIC_ALLOC     // Use only static allocation
-#define POINTS_NO_STDIO             // Disable printf/stdio functions
-```
-
-### 📊 Memory Usage Comparison
-
-```
-💾 Memory Footprint:
-📱 Desktop Mode:    ~2-4KB base + dynamic allocation
-🔧 Embedded Mode:   ~500B-1KB base + static pools
-⚡ Minimal Mode:    ~200B-400B base + user-defined pools
+#define MAX_BUFFER_PRINT 128 // BufferSize Print the DataType
+#define _SECTOR_RAM_(x) malloc(x) // select memory source in SRAM\RAM
+#define _SECTOR_PSRAM_(x) malloc(x) // Example For ESP32 Maybe change ps_malloc(x)
+#define _SECTOR_SPARE1_(x) malloc(x) // Spare for any memory funtion allocate
+#define _SECTOR_SPARE2_(x) malloc(x) // Spare for any memory funtion allocate
 ```
 
 ### 🎯 Arduino Example

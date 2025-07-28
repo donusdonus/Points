@@ -14,346 +14,354 @@
 #include <stdint.h>
 #include <string.h>
 
-/** @brief Base point configuration macro */
-#define BASE_POINT_CONFIG
-#ifdef BASE_POINT_CONFIG 
-/** @brief Include null terminator in string calculations */
-#define INCLUDE_NULL_END 1
-/** @brief Maximum buffer size for printing operations */
+/** Base point configuration macro */
+/** Maximum buffer size for printing operations */
+#define MARK_CHAR_NULL 0x00
+#define MARK_FREE_MEMORY 0x0FF
 #define MAX_BUFFER_PRINT 128
-static char PrintOut[MAX_BUFFER_PRINT];
-/** @brief Maximum characters for point names including null terminator */
-#define MAX_CHAR_NAME 16 + INCLUDE_NULL_END
+#define _SECTOR_RAM_(x) malloc(x)
+#define _SECTOR_PSRAM_(x) malloc(x)
+#define _SECTOR_SPARE1_(x) malloc(x)
+#define _SECTOR_SPARE2_(x) malloc(x)
+#define RAM_FREE(x) free(x)
+/** Maximum buffer size for printing operations */
 
-#endif
 
-/**
- * @brief Enumeration of supported data types for Point objects
+#pragma pack(push,1)
+/** @brief Raw memory structure for Point data
  * 
- * This enum defines all the data types that can be stored and managed
- * by Point objects, including primitive types and group containers.
+ * This structure holds a pointer to the raw memory buffer and its size.
+ * It is used to manage the data associated with Point objects.
  */
-/**
- * @brief Enumeration of supported data types for Point objects
- * 
- * This enum defines all the data types that can be stored and managed
- * by Point objects, including primitive types and group containers.
- */
+struct RawMemory
+{
+    public:
+    /// @brief Pointer to the raw memory buffer
+    uint8_t *value;
+    /// @brief Size of the raw memory buffer in bytes
+    size_t   size;
+};
+#pragma pack(pop)
+
+#pragma pack(push,1)
+/// @brief Memory types for Point data allocation
+/// @details This enum defines the memory types used for allocating data buffers in Point objects.
+enum isMemory
+{
+    RAM,    
+    PSRAM,
+    SPARE_1,
+    SPARE_2
+};
+#pragma pack(pop)
+
+#pragma pack(push,1)
+/// @brief Enumeration of supported data types for Point objects
+/// @details This enum defines all the data types that can be stored and managed
+/// by Point objects, including primitive types and group containers.
 enum isType
 {
-    GROUP_T,    /**< Group container type for hierarchical data */
-    CHAR_T,     /**< Single character type */
-    INT8_T,     /**< 8-bit signed integer */
-    UINT8_T,    /**< 8-bit unsigned integer */
-    INT16_T,    /**< 16-bit signed integer */
-    UINT16_T,   /**< 16-bit unsigned integer */
-    INT32_T,    /**< 32-bit signed integer */
-    UINT32_T,   /**< 32-bit unsigned integer */
-    FLOAT_T,    /**< Single precision floating point */
-    DOUBLE_T,   /**< Double precision floating point */
+    VAR_GROUP,    /**< Group container type for hierarchical data */
+    VAR_CHAR,     /**< Single character type */
+    VAR_INT8,     /**< 8-bit signed integer */
+    VAR_UINT8,    /**< 8-bit unsigned integer */
+    VAR_INT16,    /**< 16-bit signed integer */
+    VAR_UINT16,   /**< 16-bit unsigned integer */
+    VAR_INT32,    /**< 32-bit signed integer */
+    VAR_UINT32,   /**< 32-bit unsigned integer */
+    VAR_FLOAT,    /**< Single precision floating point */
+    VAR_DOUBLE   /**< Double precision floating point */
 };
+#pragma pack(pop)
 
-/**
- * @brief Type information structure for Point schema
- * 
- * Contains metadata about each supported data type including
- * size information, format specifiers, and access permissions.
- */
+#pragma pack(push,1)
+/// @brief Type information structure for Point data types
+/// @details This structure contains metadata about each data type, including its name, size, and
+/// whether it supports read and write operations.
 struct TypeInfo {
-    const char* name;       /**< Human-readable type name */
-    size_t size;            /**< Size in bytes of the data type */
-    bool canRead;           /**< Whether this type supports read operations */
-    bool canWrite;          /**< Whether this type supports write operations */
+    const char* name;       
+    uint8_t element_size;        
+    bool canRead:1;          
+    bool canWrite:1;    
 };
-
-/**
- * @brief Static array containing type information for all supported types
- * 
- * This lookup table provides metadata for each type defined in isType enum.
- * Used internally for type validation, size calculations, and formatting.
- */
-/**
- * @brief Static array containing type information for all supported types
- * 
- * This lookup table provides metadata for each type defined in isType enum.
- * Used internally for type validation, size calculations, and formatting.
- */
+#pragma pack(pop)
 
 
+/* FlagMark Properties of Point */
+#pragma pack(push,1)
+typedef union FlagMark
+{
+    uint16_t Value = 0;
+    struct 
+    {       
+        uint8_t DataAllocated : 1;
+        uint8_t NameAllocated : 1;
+        isMemory MemType : 2;
+        /* check type */
+        isType VarType : 4; 
+        /* In Group */
+        uint8_t InGroup : 1;
+    };   
+}FlagMark;
+#pragma pack(pop)
+
+static char PrintOut[MAX_BUFFER_PRINT];
+typedef size_t (*PrintPointData)(size_t ,void *,size_t);
+size_t static DISP_CHAR(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%c",((char*)data)[index]);}
+size_t static DISP_INT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int8_t*)data)[index]);}
+size_t static DISP_UINT8(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint8_t*)data)[index]);}
+size_t static DISP_INT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int16_t*)data)[index]);}
+size_t static DISP_UINT16(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint16_t*)data)[index]);}
+size_t static DISP_INT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((int32_t*)data)[index]);}
+size_t static DISP_UINT32(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%d ",((uint32_t*)data)[index]);}
+size_t static DISP_FLOAT(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((float*)data)[index]);}
+size_t static DISP_DOUBLE(size_t offset,void *data,size_t index){ return  snprintf(PrintOut + offset,MAX_BUFFER_PRINT - offset,"%.3f ",((double*)data)[index]);}
 
 static const TypeInfo SchematicPoint[] = 
 {
-    {"GROUP" , sizeof(NULL)     ,true,false},  /**< Group type - read only */
-    {"CHAR"  , sizeof(char)     ,true,true},   /**< Character type */
-    {"INT8"  , sizeof(int8_t)   ,true,true},   /**< 8-bit signed integer */
-    {"UINT8" , sizeof(uint8_t)  ,true,true},   /**< 8-bit unsigned integer */
-    {"INT16" , sizeof(int16_t)  ,true,true},   /**< 16-bit signed integer */
-    {"UINT16", sizeof(uint16_t) ,true,true},   /**< 16-bit unsigned integer */
-    {"INT32" , sizeof(int32_t)  ,true,true},   /**< 32-bit signed integer */
-    {"UINT32", sizeof(uint32_t) ,true,true},   /**< 32-bit unsigned integer */
-    {"FLOAT" , sizeof(float)    ,true,true},   /**< Single precision float */
-    {"DOUBLE", sizeof(double)   ,true,true}    /**< Double precision float */
+    {"GROUP"  + MARK_CHAR_NULL , 1                ,true,false},  /**< Group type - read only */
+    {"CHAR"   + MARK_CHAR_NULL , sizeof(char)     ,true,true},   /**< Character type */
+    {"INT8"   + MARK_CHAR_NULL , sizeof(int8_t)   ,true,true},   /**< 8-bit signed integer */
+    {"UINT8"  + MARK_CHAR_NULL , sizeof(uint8_t)  ,true,true},   /**< 8-bit unsigned integer */
+    {"INT16"  + MARK_CHAR_NULL , sizeof(int16_t)  ,true,true},   /**< 16-bit signed integer */
+    {"UINT16" + MARK_CHAR_NULL , sizeof(uint16_t) ,true,true},   /**< 16-bit unsigned integer */
+    {"INT32"  + MARK_CHAR_NULL , sizeof(int32_t)  ,true,true},   /**< 32-bit signed integer */
+    {"UINT32" + MARK_CHAR_NULL , sizeof(uint32_t) ,true,true},   /**< 32-bit unsigned integer */
+    {"FLOAT"  + MARK_CHAR_NULL , sizeof(float)    ,true,true},   /**< Single precision float */
+    {"DOUBLE" + MARK_CHAR_NULL , sizeof(double)   ,true,true}    /**< Double precision float */
 };
 
-/**
- * @brief Point class for flexible data type management
- * 
- * The Point class provides a flexible container for storing various data types
- * with type safety, automatic memory management, and support for arrays.
- * It can store primitive types (int, float, char, etc.) as well as organize
- * points into hierarchical groups.
- * 
- * Key features:
- * - Template-based type-safe value access
- * - Dynamic memory allocation for data storage
- * - Support for arrays (multiple elements per point)
- * - Linked list structure for point organization
- * - Group functionality for hierarchical data
- * 
- * @note This class uses raw pointers for memory management.
- *       Ensure proper cleanup when using in production code.
- */
+
+PrintPointData static FuncPrintValue[]   = {
+                                       nullptr,
+                                       &DISP_CHAR,
+                                       &DISP_INT8,
+                                       &DISP_UINT8,
+                                       &DISP_INT16,
+                                       &DISP_UINT16,
+                                       &DISP_INT32,
+                                       &DISP_UINT32,
+                                       &DISP_FLOAT,
+                                       &DISP_DOUBLE
+                                   };
+
+
 class Point {
 public:
 
-    /**
-     * @brief Constructor for creating a Point with specified type and name
-     * @param type The data type for this point (from isType enum)
-     * @param name Human-readable name for the point (max 16 characters)
-     * @param numberElements Number of elements to allocate (default: 1)
-     */
-    Point(isType type,const char * name,size_t numberElements);
-   
-    /**
-     * @brief Template constructor for creating a Point with initial data
-     * @tparam T The C++ type of the initial data
-     * @param type The data type for this point (from isType enum)
-     * @param name Human-readable name for the point
-     * @param data Initial data value to store
-     */
-    template <typename T>
-    Point(isType type,const char * name,T data)
+    /// @brief Create Point as GROUP_T Only
+    /// @param name name of group
+    /// @param memtype specification memory type for allocate
+    Point(const char * name,isMemory memtype = isMemory::RAM);
+
+    /// @brief Create Point With Assign type and reference addr with size
+    /// @param type type of Point
+    /// @param name name of Point
+    /// @param addr reference address 
+    /// @param numberElements Number Elements ArraySize
+    /// @param memtype specification memory type for allocate
+    Point(isType type , const char * name,uint8_t *addr,size_t numberElements = 1,isMemory memtype = isMemory::RAM);
+     
+    /// @brief Create Point by assign type with init array size 
+    /// @param type type of Point
+    /// @param name name of Point
+    /// @param numberElements Number Elements ArraySize
+    /// @param memtype specification memory type for allocate 
+    Point(isType type,const char * name,size_t numberElements = 1 ,isMemory memtype = isMemory::RAM);
+    
+    ~Point() {
+                    int index = GetPointCount();
+                    if(index > 0)
+                        for (size_t i = 0; i < index; i++)
+                            DeleteByIndex(i);
+                    Remove();
+                    free(this);
+             };
+    
+    /// @brief SetValue Point and assign index
+    /// @tparam T reference enum is type
+    /// @param data Single Data Point
+    /// @param index assign index of elements
+    /// @return true is can setvalue , false cannot setvalue
+    template<typename T>
+    bool SetValue(T data,size_t index = 0)
     {
-        Init();
-        SetName(name);
-        SetType(type);
-        ByteCount(type,1);
-        ByteAllocate();
-        FillEveryByteInData(0x00);
-        SetValue(data);
+        /* Init Monitor */
+        monitor = true;
+
+        /* Check Point State is Ready */
+        monitor = (_prop.DataAllocated & _prop.NameAllocated);
+        if(!monitor) 
+            return monitor;
+
+        /* Check State type is support write */
+        monitor = SchematicPoint[_prop.VarType].canWrite;    
+        if(!monitor) 
+            return monitor;
+
+        /* Check Size T is Correct */
+        monitor = (sizeof(T) == SchematicPoint[_prop.VarType].element_size)? true : false;
+        if(!monitor)
+            return monitor;
+
+        /* Check index is outside element */
+        monitor = ((_data.size/SchematicPoint[_prop.VarType].element_size) >= index)? true : false ;
+        if(!monitor)
+            return monitor;
+
+        /* Copy Data  */
+      
+        memcpy( 
+                &_data.value[SchematicPoint[_prop.VarType].element_size*index],
+                &data,
+                sizeof(data)
+              );
+
+        return monitor;
     }
 
-    /**
-     * @brief Template constructor for creating a Point with array data
-     * @tparam T The C++ type of the array elements
-     * @param type The data type for this point (from isType enum)
-     * @param name Human-readable name for the point
-     * @param data Pointer to array data to copy
-     * @param numberElements Number of elements in the array (default: 1)
-     */
-    template <typename T>
-    Point(isType type,const char * name,T *data,size_t numberElements)
-    {
-        Init();
-        SetName(name);
-        SetType(type);
-        ByteCount(type,numberElements);
-        ByteAllocate();
-        FillEveryByteInData(0x00);
-        SetValue(data,numberElements);   
-    }
 
-
-    ~Point() {Clear();}
-    /**
-     * @brief Set a single value in the point
-     * @tparam T The C++ type of the value
-     * @param data The value to store
-     * @return true if successful, false otherwise
-     */
+    /// @brief GetValue Point
+    /// @tparam T reference enum is type
+    /// @param Index Index of Point
+    /// @return Data in Point
     template<typename T>
-    bool SetValue(T data)
+    T GetValue(size_t index = 0)
     {
-        return SetValue(&data,1);
-    }    
+        /* Init Monitor */
+        monitor = true;
 
-    /**
-     * @brief Set array values in the point
-     * @tparam T The C++ type of the array elements
-     * @param data Pointer to array data to copy
-     * @param size Number of elements to copy (default: 1)
-     * @return true if successful, false otherwise
-     */
-    template<typename T>
-    bool SetValue(T *data,size_t size)
-    {
-        auto temp = GetTypeInfo().canWrite;
-        if(temp == false) return false;
-
-        if(_total_byte_size < (sizeof(T)*size)) return false;
-
-        if(_data == nullptr) return false;
-
-        if(data == nullptr) return false;
-
-        memcpy(_data,data,sizeof(T)*size);
-
-        return true;
-    }
-
-    /**
-     * @brief Get the first value from the point
-     * @tparam T The C++ type to cast the value to
-     * @return The value cast to type T
-     */
-    template<typename T>
-    T GetValue()
-    {
         T var{} ;
 
-        if(_data == nullptr) return var;
+        /* Check Point State is Ready */
+        monitor = (_prop.DataAllocated & _prop.NameAllocated);
+        if(!monitor) 
+            return T{};
 
-        var = *((T*)_data);
+        /* Check State type is support  */
+        monitor = SchematicPoint[_prop.VarType].canRead;    
+        if(!monitor) 
+            return T{};
 
-        return var;
+        /* Check Size T is Correct */
+        monitor = (sizeof(T) == SchematicPoint[_prop.VarType].element_size)? true : false;
+        if(!monitor)
+            return T{};
+
+        /* Check index is outside element */
+        monitor = ((_data.size/SchematicPoint[_prop.VarType].element_size) > index)? true : false ;
+        if(!monitor)
+            return T{};
+
+        /* Return Data  */
+        T* ptr = (T*)_data.value;
+        return ptr[index] ;
     }
 
-    /**
-     * @brief Get a value at specific index from the point
-     * @tparam T The C++ type to cast the value to
-     * @param index Zero-based index of the element to retrieve
-     * @return The value at the specified index cast to type T
-     */
-    template<typename T>
-    T GetValue(size_t index)
-    {
-        T var{} ;
-        if(index >= _element_size) return var;
-        if(_data == nullptr) return var;
-        return ((T*)_data)[index];
-    }
+    /// @brief Get Elements Array Count
+    /// @return Size of Array Point
+    const size_t Count();
 
-    /**
-     * @brief Get direct access to the raw data buffer
-     * @return Pointer to the raw data buffer
-     * @warning Use with caution - direct memory access without type checking
-     */
-    void * GetRawBuffer();
+    /// @brief Get Raw Buffer Data Point
+    /// @param src source reference Data
+    /// @return true if buffer can reference
+    bool GetBuffer(RawMemory *src);
     
-    /**
-     * @brief Clear all data in the point (set to zero)
-     */
-    void ClearValue(); 
-
-    /**
-     * @brief Set the name of the point
-     * @param name New name for the point (max 16 characters)
-     * @return true if successful, false if name too long
-     */
-    bool SetName(const char name[]);
-    
-    /**
-     * @brief Get the name of the point
-     * @return Pointer to the point's name string
-     */
+    bool SetName(const char *name);
+    /// @brief Get Name of Point
+    /// @return Point Name
     const char* GetName();
     
-    /**
-     * @brief Get type information for this point
-     * @return TypeInfo structure containing metadata about the point's type
-     */
-    const TypeInfo GetTypeInfo();
-
+    /// @brief Get Point Type
+    /// @return Point Type
     const isType GetType();
 
-    bool Copy(Point *src);
-    
+    /// @brief Get Summary Size of Point
+    /// @return size of point
+    const size_t GetTotalByteSize();
 
-    /**
-     * @brief Get the number of elements in this point
-     * @return Number of elements stored in the point
-     */
-    const size_t Count();
-    
-    /**
-     * @brief Get the total byte size of the data
-     * @return Total number of bytes allocated for data storage
-     */
-    const size_t GetByteSize();
+    /// @brief Get Summary Size of Data Byte Buffer
+    /// @return Byte Buffer Size of Data
+    const size_t GetValueByteSize();
 
-    /* Group Management Functions */
-    
-    /**
-     * @brief Add a new slot to this point (if it's a GROUP_T)
-     * @return true if successful, false if not a group or allocation failed
-     */
+    /// @brief Get Flag Mark of Point
+    /// @details This function returns the current flag mark of the Point, which includes metadata such
+    /// @return Flag Mark
+    const FlagMark GetFlagMark();
 
-    bool AddSlot(Point point);
-    
-    /**
-     * @brief Find a point by name within this group
-     * @param name Name of the point to search for
-     * @return Pointer to the found point, or nullptr if not found
-     */
-    Point* FindSlot(const char name[]);
-    
-    /**
-     * @brief Delete a point from this group
-     * @param Point Pointer to the point to delete
-     * @return true if successful, false if not found or not a group
-     */
-    bool DeleteSlot(Point *Point);
+    //bool Copy(Point *src);
 
+    /// @brief Get Home Pointer of Point
+    /// @param None
+    /// @return Pointer to Home Point
+    Point * Home(void);
+    
+    /// @brief Insert a new Point into GROUP_T. must start Call by GROUP_T
+    /// @param type Type of Point to insert
+    /// @param name Name of the new Point
+    /// @param numberElements Number of elements in the new Point
+    /// @param memtype Memory type for the new Point
+    Point * Insert(
+                    isType type , 
+                    const char * name,
+                    size_t numberElements = 1,
+                    isMemory memtype = isMemory::RAM
+                  );
+ 
+    /// @brief Find a Point by name. must start Call by GROUP_T
+    /// @param name Name of the Point to find
+    /// @return Pointer to the found Point, or nullptr if not found
+    Point * FindByName(const char name[]);
+
+
+    /// @brief Find a Point by index. must start Call by GROUP_T
+    /// @param index Index of the Point to find
+    /// @return Pointer to the found Point, or nullptr if not found
+    Point * FindByIndex(size_t index);
+
+    /// @brief Get the index of the current Point
+    /// @return Index of the current Point
+    int  GetIndex();
+
+    /// @brief Get the count of Points in the current group
+    /// @return Number of Points in the group
+    size_t GetPointCount();
+
+    /// @brief Delete a Point by name. must start Call by GROUP_T
+    /// @param name Name of the Point to delete
+    /// @return true if the Point was deleted, false otherwise
+    bool DeleteByName(const char name[]);
+
+    /// @brief Delete a Point by index. must start Call by GROUP_T
+    /// @param index Index of the Point to delete
+    /// @return true if the Point was deleted, false otherwise
+    bool DeleteByIndex(size_t index);
+
+    /// @brief Get the context information of the Point
+    /// @return Pointer to the context information string
     const char * DisplayContext();
-    const char * DisplayValue();
 
-
-    char  _name[MAX_CHAR_NAME];          /**< Point name storage */
-    void* _data;                         /**< Raw data buffer */
-
-    size_t _element_size = 1;            /**< Number of elements stored */
-    size_t _total_byte_size = 0;         /**< Total allocated bytes */
-
-    isType _type;                        /**< Type of data stored */
-    Point *_group = nullptr;                       /**< Pointer to group members (for GROUP_T) */
-    Point *_next = nullptr;                        /**< Next point in linked list */
-    Point *_previous = nullptr;                    /**< Previous point (reserved for future use) */
-
+    /// @brief Get the value of the Point as a string
+    /// @param index Index of the element to display
+    /// @return Pointer to the value string
+    const char * DisplayValue(size_t index = 0);
 
 
 private:
 
-    /**
-     * @brief Initialize point members to default values
-     */
-    void Init();
-
-    void SetType(isType type);
+    #pragma region "Variable Group"
+        RawMemory _name;
+        RawMemory _data;
+        FlagMark _prop;
     
-    /**
-     * @brief Calculate required bytes for given type and element count
-     * @param type Data type
-     * @param numberElements Number of elements
-     */
-    void ByteCount(isType type,size_t numberElements);
-    
-    /**
-     * @brief Allocate memory for data storage
-     * @return true if successful, false on allocation failure
-     */
-    bool ByteAllocate();
-    
-    /**
-     * @brief Clean up and deallocate resources
-     */
-    void Clear();
-
-    /**
-     * @brief Fill data buffer with specified byte value
-     * @param mark Byte value to fill the buffer with
-     */
-    void FillEveryByteInData(uint8_t mark);
-
+        Point *_ptr_home;                       /**< Pointer to group members (for GROUP_T) */
+        Point *_ptr_next;                       /**< Pointer to group members (for GROUP_T) */
+    #pragma endregion
+ 
+    size_t DeleteAll(void);
+    bool ByteAllocate(isMemory memtype,size_t numberelements);
+    void Remove();
+    bool monitor = false;
 };
 
 #endif // POINT_H
