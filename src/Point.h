@@ -96,11 +96,13 @@ typedef union FlagMark
     {       
         uint8_t DataAllocated : 1;
         uint8_t NameAllocated : 1;
+        uint8_t ExterMemory :1;
         isMemory MemType : 2;
         /* check type */
         isType VarType : 4; 
         /* In Group */
-        uint8_t InGroup : 1;
+        
+
     };   
 }FlagMark;
 #pragma pack(pop)
@@ -147,6 +149,9 @@ PrintPointData static FuncPrintValue[]   = {
 
 
 class Point {
+
+//friend class PointList;
+
 public:
 
     /// @brief Create Point as GROUP_T Only
@@ -170,12 +175,12 @@ public:
     Point(isType type,const char * name,size_t numberElements = 1 ,isMemory memtype = isMemory::RAM);
     
     ~Point() {
-                    int index = GetPointCount();
+                    int index = GetItemCount();
                     if(index > 0)
                         for (size_t i = 0; i < index; i++)
-                            DeleteByIndex(i);
+                            RemoveItem(i);
                     Remove();
-                    free(this);
+                   // free(this);
              };
     
     /// @brief SetValue Point and assign index
@@ -289,7 +294,7 @@ public:
     /// @return Flag Mark
     const FlagMark GetFlagMark();
 
-    //bool Copy(Point *src);
+    ///bool Copy(Point *src);
 
     /// @brief Get Home Pointer of Point
     /// @param None
@@ -301,9 +306,17 @@ public:
     /// @param name Name of the new Point
     /// @param numberElements Number of elements in the new Point
     /// @param memtype Memory type for the new Point
-    Point * Insert(
+    Point * AddItem(
                     isType type , 
                     const char * name,
+                    size_t numberElements = 1,
+                    isMemory memtype = isMemory::RAM
+                  );
+
+    Point * AddItem(
+                    isType type , 
+                    const char * name,
+                    uint8_t *addr,
                     size_t numberElements = 1,
                     isMemory memtype = isMemory::RAM
                   );
@@ -311,31 +324,31 @@ public:
     /// @brief Find a Point by name. must start Call by GROUP_T
     /// @param name Name of the Point to find
     /// @return Pointer to the found Point, or nullptr if not found
-    Point * FindByName(const char name[]);
+    Point * FindItem(const char name[]);
 
 
     /// @brief Find a Point by index. must start Call by GROUP_T
     /// @param index Index of the Point to find
     /// @return Pointer to the found Point, or nullptr if not found
-    Point * FindByIndex(size_t index);
+    Point * FindItem(size_t index);
 
     /// @brief Get the index of the current Point
     /// @return Index of the current Point
-    int  GetIndex();
+    int  GetItemIndex();
 
     /// @brief Get the count of Points in the current group
     /// @return Number of Points in the group
-    size_t GetPointCount();
+    size_t GetItemCount();
 
     /// @brief Delete a Point by name. must start Call by GROUP_T
     /// @param name Name of the Point to delete
     /// @return true if the Point was deleted, false otherwise
-    bool DeleteByName(const char name[]);
+    bool RemoveItem(const char name[]);
 
     /// @brief Delete a Point by index. must start Call by GROUP_T
     /// @param index Index of the Point to delete
     /// @return true if the Point was deleted, false otherwise
-    bool DeleteByIndex(size_t index);
+    bool RemoveItem(size_t index);
 
     /// @brief Get the context information of the Point
     /// @return Pointer to the context information string
@@ -349,19 +362,50 @@ public:
 
 private:
 
+    bool monitor = false;
+
     #pragma region "Variable Group"
+
         RawMemory _name;
         RawMemory _data;
         FlagMark _prop;
     
-        Point *_ptr_home;                       /**< Pointer to group members (for GROUP_T) */
-        Point *_ptr_next;                       /**< Pointer to group members (for GROUP_T) */
+        Point *_item_home;                       /**< Pointer to group members (for GROUP_T) */
+        Point *_item_next;                       /**< Pointer to group members (for GROUP_T) */
+    
+        Point *_node_home;
+        Point *_node_next;
+
     #pragma endregion
  
-    size_t DeleteAll(void);
     bool ByteAllocate(isMemory memtype,size_t numberelements);
     void Remove();
-    bool monitor = false;
+
+    Point * init(const char * name,isMemory memtype = isMemory::RAM,bool clone = false);
+    Point * init(isType type , const char * name,uint8_t *addr,size_t numberElements = 1,isMemory memtype = isMemory::RAM,bool clone = false);
+    Point * init(isType type,const char * name,size_t numberElements = 1 ,isMemory memtype = isMemory::RAM,bool clone = false);
+
+    Point * add(const char * name,isMemory memtype = isMemory::RAM,bool operate_node = false);
+    Point * add(isType type , const char * name,uint8_t *addr,size_t numberElements = 1,isMemory memtype = isMemory::RAM,bool operate_node = false);
+    Point * add(isType type,const char * name,size_t numberElements = 1 ,isMemory memtype = isMemory::RAM,bool operate_node = false);
+    
+    /* modified */
+    Point * index(size_t index,bool operate_node = false);
+    Point * find(const char * name,bool operate_node = false);
+    Point * find(size_t index,bool operate_node = false);
+    Point * get(bool operate_node = false);
+   
+    /* modified */
+    int count(bool operate_node = false);
+
+    /* modified */
+    Point * next(Point *src,bool operate_node = false);
+    bool  can_next(Point *src);
+
+    /* modified */
+    Point * home(Point *src,bool operate_node = false);
+
+    bool remove(bool operate_node = false);
 };
 
 #endif // POINT_H

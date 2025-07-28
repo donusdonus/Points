@@ -21,6 +21,26 @@
 ## 🌟 Overview
 
 The **Points Library** is a C++11 solution that revolutionizes how you handle typed data points container across **Desktop Applications** and **Embedded/MCU Platforms**. Whether you're building IoT devices, industrial controllers, data acquisition systems, or configuration managers, this library provides the foundation you need.
+ 
+## 📋 Supported Data Types
+
+<div align="center">
+
+| 🏷️ Type | 📝 Description | 📐 Size | 🎨 Example |
+|---------|----------------|---------|------------|
+| `CHAR_T` | Single character | 1 byte | `'A'`, `'#'`, `'9'` |
+| `INT8_T` | 8-bit signed integer | 1 byte | `-128` to `127` |
+| `UINT8_T` | 8-bit unsigned integer | 1 byte | `0` to `255` |
+| `INT16_T` | 16-bit signed integer | 2 bytes | `-32,768` to `32,767` |
+| `UINT16_T` | 16-bit unsigned integer | 2 bytes | `0` to `65,535` |
+| `INT32_T` | 32-bit signed integer | 4 bytes | `-2.1B` to `2.1B` |
+| `UINT32_T` | 32-bit unsigned integer | 4 bytes | `0` to `4.3B` |
+| `FLOAT_T` | Single precision float | 4 bytes | `3.14f`, `-0.001f` |
+| `DOUBLE_T` | Double precision float | 8 bytes | `3.141592653589793` |
+| `GROUP_T` | Container for other points | Variable | Hierarchical data |
+
+</div>
+
 
 ## 🎯 Features
 
@@ -247,27 +267,6 @@ lib_deps =
 3. **📚 Include** in your main.cpp: `#include "Points.h"`
 
 </details>
-
----
-
-## �📋 Supported Data Types
-
-<div align="center">
-
-| 🏷️ Type | 📝 Description | 📐 Size | 🎨 Example |
-|---------|----------------|---------|------------|
-| `CHAR_T` | Single character | 1 byte | `'A'`, `'#'`, `'9'` |
-| `INT8_T` | 8-bit signed integer | 1 byte | `-128` to `127` |
-| `UINT8_T` | 8-bit unsigned integer | 1 byte | `0` to `255` |
-| `INT16_T` | 16-bit signed integer | 2 bytes | `-32,768` to `32,767` |
-| `UINT16_T` | 16-bit unsigned integer | 2 bytes | `0` to `65,535` |
-| `INT32_T` | 32-bit signed integer | 4 bytes | `-2.1B` to `2.1B` |
-| `UINT32_T` | 32-bit unsigned integer | 4 bytes | `0` to `4.3B` |
-| `FLOAT_T` | Single precision float | 4 bytes | `3.14f`, `-0.001f` |
-| `DOUBLE_T` | Double precision float | 8 bytes | `3.141592653589793` |
-| `GROUP_T` | Container for other points | Variable | Hierarchical data |
-
-</div>
 
 ---
 
