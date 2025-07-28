@@ -141,6 +141,19 @@ Point/fast:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\Point.dir\build.make Point/CMakeFiles/Point.dir/build
 .PHONY : Point/fast
 
+#=============================================================================
+# Target rules for targets named PointList
+
+# Build rule for target.
+PointList: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 PointList
+.PHONY : PointList
+
+# fast build rule for target.
+PointList/fast:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/build
+.PHONY : PointList/fast
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -174,6 +187,7 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... Point
+	@echo ... PointList
 	@echo ... app
 	@echo ... main.obj
 	@echo ... main.i

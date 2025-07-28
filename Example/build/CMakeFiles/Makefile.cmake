@@ -63,4 +63,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/app.dir/DependInfo.cmake"
   "Point/CMakeFiles/Point.dir/DependInfo.cmake"
+  "Point/CMakeFiles/PointList.dir/DependInfo.cmake"
   )

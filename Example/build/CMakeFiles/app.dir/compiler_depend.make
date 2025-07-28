@@ -3,6 +3,7 @@
 
 CMakeFiles/app.dir/main.cpp.obj: C:/Project/Points/Example/main.cpp \
   C:/Project/Points/src/Point.h \
+  C:/Project/Points/src/PointList.h \
   C:/msys64/mingw32/include/_mingw.h \
   C:/msys64/mingw32/include/_mingw_mac.h \
   C:/msys64/mingw32/include/_mingw_off_t.h \
@@ -160,8 +161,6 @@ C:/msys64/mingw32/lib/gcc/i686-w64-mingw32/15.1.0/include/syslimits.h:
 
 C:/msys64/mingw32/lib/gcc/i686-w64-mingw32/15.1.0/include/stdint.h:
 
-C:/msys64/mingw32/lib/gcc/i686-w64-mingw32/15.1.0/include/stddef.h:
-
 C:/msys64/mingw32/include/time.h:
 
 C:/msys64/mingw32/include/stdlib.h:
@@ -242,19 +241,19 @@ C:/msys64/mingw32/include/c++/15.1.0/bits/invoke.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/ext/numeric_traits.h:
 
-C:/msys64/mingw32/include/stddef.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/bits/stl_pair.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/bits/basic_ios.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/bits/cxxabi_forced.h:
-
 C:/msys64/mingw32/include/wchar.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/alloc_traits.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/locale_facets.tcc:
+
+C:/msys64/mingw32/include/c++/15.1.0/bits/cxxabi_forced.h:
+
+C:/msys64/mingw32/include/c++/15.1.0/bits/basic_ios.h:
+
+C:/msys64/mingw32/include/stddef.h:
+
+C:/msys64/mingw32/include/c++/15.1.0/bits/stl_pair.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/basic_ios.tcc:
 
@@ -314,6 +313,10 @@ C:/msys64/mingw32/include/c++/15.1.0/bits/postypes.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/concept_check.h:
 
+C:/msys64/mingw32/lib/gcc/i686-w64-mingw32/15.1.0/include/stddef.h:
+
+C:/Project/Points/src/PointList.h:
+
 C:/msys64/mingw32/include/c++/15.1.0/bits/ostream.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/exception_defines.h:
@@ -337,6 +340,14 @@ C:/msys64/mingw32/include/locale.h:
 C:/Project/Points/Example/main.cpp:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/parse_numbers.h:
+
+C:/msys64/mingw32/include/c++/15.1.0/bits/hash_bytes.h:
+
+C:/msys64/mingw32/include/c++/15.1.0/bits/basic_string.h:
+
+C:/msys64/mingw32/include/stdint.h:
+
+C:/msys64/mingw32/include/c++/15.1.0/ext/alloc_traits.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/basic_string.tcc:
 
@@ -362,13 +373,9 @@ C:/msys64/mingw32/include/c++/15.1.0/bits/stl_iterator_base_types.h:
 
 C:/msys64/mingw32/include/c++/15.1.0/bits/ptr_traits.h:
 
-C:/msys64/mingw32/include/c++/15.1.0/bits/basic_string.h:
+C:/msys64/mingw32/include/pthread_time.h:
 
-C:/msys64/mingw32/include/stdint.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/ext/alloc_traits.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/bits/hash_bytes.h:
+C:/msys64/mingw32/include/c++/15.1.0/bits/chrono.h:
 
 C:/msys64/mingw32/include/sys/timeb.h:
 
@@ -457,7 +464,3 @@ C:/msys64/mingw32/include/corecrt_wctype.h:
 C:/msys64/mingw32/include/crtdefs.h:
 
 C:/msys64/mingw32/include/pthread_signal.h:
-
-C:/msys64/mingw32/include/c++/15.1.0/bits/chrono.h:
-
-C:/msys64/mingw32/include/pthread_time.h:

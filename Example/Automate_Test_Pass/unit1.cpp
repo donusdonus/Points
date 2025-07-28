@@ -1,69 +1,131 @@
-#include "Point.h"
 #include <iostream>
-#include <cmath>
+#include <chrono>
+#include <cassert>
+#include <cstring>
+#include "Point.h"
 
-#define ASSERT_TRUE(cond, msg) \
-    do { \
-        if (!(cond)) { \
-            std::cout << "[FAIL] " << msg << std::endl; \
-            return false; \
-        } \
-    } while(0)
+using namespace std;
+using namespace std::chrono;
 
-#define ASSERT_EQ(a, b, msg) \
-    do { \
-        if ((a) != (b)) { \
-            std::cout << "[FAIL] " << msg << " | Expected: " << (b) << " Got: " << (a) << std::endl; \
-            return false; \
-        } \
-    } while(0)
+#define ASSERT(expr, message) \
+    if (!(expr)) { \
+        cout << "[FAIL] " << message << endl; \
+        failed++; \
+    } else { \
+        passed++; \
+    }
 
-#define RUN_TEST(fn) \
-    do { \
-        if (fn()) std::cout << "[PASS] " << #fn << std::endl; \
-        else failures++; \
-    } while(0)
+int failed = 0, passed = 0;
 
-bool test_int_point() {
-    Point p(INT32_T, "INT32", 1);
-    int32_t v = 1234;
-    p.SetValue(v);
+// === Test 1: Constructor & Destructor ===
+void test_ConstructorDestructor() {
+    cout << "\n[TEST 1] Constructor & Destructor" << endl;
+    auto start = high_resolution_clock::now();
 
-    uint32_t test = p.GetValue<int32_t>();
+    for (int i = 0; i < 100; ++i) {
+        Point pt(VAR_UINT32, "cons", 10);
+        ASSERT(pt.GetType() == VAR_UINT32, "Constructor failed at iteration " + to_string(i));
+    }
 
-    ASSERT_EQ(p.GetValue<int32_t>(), v, "INT32 value mismatch");
-    return true;
+    for (int i = 0; i < 100; ++i) {
+        Point* pt = new Point(VAR_FLOAT, "heap", 5);
+        delete pt;
+    }
+
+    auto stop = high_resolution_clock::now();
+    cout << "[BENCHMARK] Duration: " << duration_cast<milliseconds>(stop - start).count() << " ms" << endl;
 }
 
-bool test_array_point() {
-    uint8_t arr[4] = {1,2,3,4};
-    Point p(UINT8_T, "Array", arr, 4);
-    ASSERT_EQ(p.Count(), 4, "Array count mismatch");
-    ASSERT_EQ(p.GetValue<uint8_t>(2), 3, "Array value mismatch");
-    return true;
+// === Test 2: SetValue / GetValue ===
+template<typename T>
+void test_SetGet_Value(isType type, const char* typeName, T val1, T val2) {
+    cout << "\n[TEST 2] SetValue/GetValue<" << typeName << "> with 100 elements" << endl;
+    auto start = high_resolution_clock::now();
+
+    Point pt(type, "testPoint", 100);
+
+    for (int i = 0; i < 100; ++i)
+        ASSERT(pt.SetValue<T>(val1, i), "SetValue failed at index " + to_string(i));
+
+    for (int i = 0; i < 100; ++i)
+        ASSERT(pt.GetValue<T>(i) == val1, "GetValue mismatch at index " + to_string(i));
+
+    for (int i = 50; i < 60; ++i)
+        ASSERT(pt.SetValue<T>(val2, i), "Overwrite SetValue failed at index " + to_string(i));
+
+    for (int i = 50; i < 60; ++i)
+        ASSERT(pt.GetValue<T>(i) == val2, "Overwrite GetValue mismatch at index " + to_string(i));
+
+    // Invalid index
+    ASSERT(!pt.SetValue<T>(val1, 999), "Invalid SetValue passed");
+    ASSERT(pt.GetValue<T>(999) == T{}, "Invalid GetValue did not return default");
+
+    auto stop = high_resolution_clock::now();
+    cout << "[BENCHMARK] Duration: " << duration_cast<milliseconds>(stop - start).count() << " ms" << endl;
 }
 
-bool test_group_insert_find() {
-    Point group(GROUP_T,"X","G");
-    Point a(INT8_T, "A", 88);
-    Point b(FLOAT_T, "B", 3.14f);
+// === Test 3: Name Handling ===
+void test_Name_Handling() {
 
-    ASSERT_TRUE(group.AddSlot(a), "Add A fail");
-    ASSERT_TRUE(group.AddSlot(b), "Add B fail");
+    cout << "\n[TEST 3] Name Handling" << endl;
+    auto start = high_resolution_clock::now();
 
-    Point *found = group.FindSlot("B");
-    ASSERT_TRUE(found != nullptr, "Find B failed");
-    ASSERT_EQ(found->GetValue<float>(), 3.14f, "Value B mismatch");
-    return true;
+    Point pt(VAR_INT32, "original", 1);
+    ASSERT(strcmp(pt.GetName(), "original") == 0, "Initial name incorrect");
+    ASSERT(pt.SetName("renamed"), "SetName failed");
+    ASSERT(strcmp(pt.GetName(), "renamed") == 0, "Renamed GetName incorrect");
+
+    auto stop = high_resolution_clock::now();
+    cout << "[BENCHMARK] Duration: " << duration_cast<milliseconds>(stop - start).count() << " ms" << endl;
+}
+
+// === Test 4: Type & FlagMark ===
+void test_TypeAndFlag() {
+    cout << "\n[TEST 4] Type & FlagMark" << endl;
+    auto start = high_resolution_clock::now();
+
+    Point pt(VAR_UINT16, "flags", 1);
+    FlagMark f = pt.GetFlagMark();
+    ASSERT(pt.GetType() == VAR_UINT16, "GetType mismatch");
+    ASSERT(f.VarType == VAR_UINT16, "Flag VarType incorrect");
+    ASSERT(f.DataAllocated, "Flag DataAllocated not set");
+    ASSERT(f.NameAllocated, "Flag NameAllocated not set");
+
+    auto stop = high_resolution_clock::now();
+    cout << "[BENCHMARK] Duration: " << duration_cast<milliseconds>(stop - start).count() << " ms" << endl;
+}
+
+// === Test 5: Destructor loop ===
+void test_Destructor() {
+    cout << "\n[TEST 5] Destructor Loop" << endl;
+    auto start = high_resolution_clock::now();
+
+    for (int i = 0; i < 100; ++i) {
+        Point* p = new Point(VAR_FLOAT, "temp", 10);
+        delete p;
+    }
+
+    auto stop = high_resolution_clock::now();
+    cout << "[BENCHMARK] Duration: " << duration_cast<milliseconds>(stop - start).count() << " ms" << endl;
 }
 
 int main() {
-    int failures = 0;
+    auto global_start = high_resolution_clock::now();
 
-    RUN_TEST(test_int_point);
-    RUN_TEST(test_array_point);
-    RUN_TEST(test_group_insert_find);
+    test_ConstructorDestructor();
+    test_SetGet_Value<int8_t>(VAR_INT8, "int8_t", -42, 127);
+    test_SetGet_Value<uint16_t>(VAR_UINT16, "uint16_t", 1234, 4321);
+    test_SetGet_Value<float>(VAR_FLOAT, "float", 1.23f, 4.56f);
+    test_SetGet_Value<double>(VAR_DOUBLE, "double", 1.23, 9.87);
+    test_Name_Handling();
+    test_TypeAndFlag();
+    test_Destructor();
 
-    std::cout << "Total Failures: " << failures << std::endl;
-    return failures == 0 ? 0 : 1;
+    auto global_stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(global_stop - global_start);
+
+    cout << "\n[SUMMARY] Passed: " << passed << ", Failed: " << failed << endl;
+    cout << "[TOTAL TIME] " << duration.count() << " ms\n";
+
+    return failed == 0 ? 0 : 1;
 }

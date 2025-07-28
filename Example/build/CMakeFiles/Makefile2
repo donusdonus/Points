@@ -85,10 +85,12 @@ clean: Point/clean
 
 # Recursive "all" directory target.
 Point/all: Point/CMakeFiles/Point.dir/all
+Point/all: Point/CMakeFiles/PointList.dir/all
 .PHONY : Point/all
 
 # Recursive "codegen" directory target.
 Point/codegen: Point/CMakeFiles/Point.dir/codegen
+Point/codegen: Point/CMakeFiles/PointList.dir/codegen
 .PHONY : Point/codegen
 
 # Recursive "preinstall" directory target.
@@ -97,6 +99,7 @@ Point/preinstall:
 
 # Recursive "clean" directory target.
 Point/clean: Point/CMakeFiles/Point.dir/clean
+Point/clean: Point/CMakeFiles/PointList.dir/clean
 .PHONY : Point/clean
 
 #=============================================================================
@@ -104,14 +107,15 @@ Point/clean: Point/CMakeFiles/Point.dir/clean
 
 # All Build rule for target.
 CMakeFiles/app.dir/all: Point/CMakeFiles/Point.dir/all
+CMakeFiles/app.dir/all: Point/CMakeFiles/PointList.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Built target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=5,6 "Built target app"
 .PHONY : CMakeFiles/app.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/app.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/app.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 0
 .PHONY : CMakeFiles/app.dir/rule
@@ -123,7 +127,7 @@ app: CMakeFiles/app.dir/rule
 # codegen rule for target.
 CMakeFiles/app.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Finished codegen for target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=5,6 "Finished codegen for target app"
 .PHONY : CMakeFiles/app.dir/codegen
 
 # clean rule for target.
@@ -162,6 +166,38 @@ Point/CMakeFiles/Point.dir/codegen:
 Point/CMakeFiles/Point.dir/clean:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\Point.dir\build.make Point/CMakeFiles/Point.dir/clean
 .PHONY : Point/CMakeFiles/Point.dir/clean
+
+#=============================================================================
+# Target rules for target Point/CMakeFiles/PointList.dir
+
+# All Build rule for target.
+Point/CMakeFiles/PointList.dir/all:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/depend
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Built target PointList"
+.PHONY : Point/CMakeFiles/PointList.dir/all
+
+# Build rule for subdir invocation for target.
+Point/CMakeFiles/PointList.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Point/CMakeFiles/PointList.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 0
+.PHONY : Point/CMakeFiles/PointList.dir/rule
+
+# Convenience name for target.
+PointList: Point/CMakeFiles/PointList.dir/rule
+.PHONY : PointList
+
+# codegen rule for target.
+Point/CMakeFiles/PointList.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Finished codegen for target PointList"
+.PHONY : Point/CMakeFiles/PointList.dir/codegen
+
+# clean rule for target.
+Point/CMakeFiles/PointList.dir/clean:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/clean
+.PHONY : Point/CMakeFiles/PointList.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

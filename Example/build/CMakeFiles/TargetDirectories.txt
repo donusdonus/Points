@@ -2,5 +2,6 @@ C:/Project/Points/Example/build/CMakeFiles/app.dir
 C:/Project/Points/Example/build/CMakeFiles/edit_cache.dir
 C:/Project/Points/Example/build/CMakeFiles/rebuild_cache.dir
 C:/Project/Points/Example/build/Point/CMakeFiles/Point.dir
+C:/Project/Points/Example/build/Point/CMakeFiles/PointList.dir
 C:/Project/Points/Example/build/Point/CMakeFiles/edit_cache.dir
 C:/Project/Points/Example/build/Point/CMakeFiles/rebuild_cache.dir

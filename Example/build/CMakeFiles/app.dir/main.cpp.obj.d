@@ -144,4 +144,4 @@ CMakeFiles/app.dir/main.cpp.obj: C:\Project\Points\Example\main.cpp \
  C:/msys64/mingw32/include/c++/15.1.0/cstring \
  C:/msys64/mingw32/include/string.h \
  C:/msys64/mingw32/include/sec_api/string_s.h \
- C:/Project/Points/src/Point.h
+ C:/Project/Points/src/PointList.h C:/Project/Points/src/Point.h
