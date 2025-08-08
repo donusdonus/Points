@@ -129,30 +129,30 @@ app/fast:
 .PHONY : app/fast
 
 #=============================================================================
-# Target rules for targets named Point
+# Target rules for targets named TagUtility
 
 # Build rule for target.
-Point: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Point
-.PHONY : Point
+TagUtility: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 TagUtility
+.PHONY : TagUtility
 
 # fast build rule for target.
-Point/fast:
-	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\Point.dir\build.make Point/CMakeFiles/Point.dir/build
-.PHONY : Point/fast
+TagUtility/fast:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagUtility.dir\build.make Point/CMakeFiles/TagUtility.dir/build
+.PHONY : TagUtility/fast
 
 #=============================================================================
-# Target rules for targets named PointList
+# Target rules for targets named TagStatic
 
 # Build rule for target.
-PointList: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 PointList
-.PHONY : PointList
+TagStatic: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 TagStatic
+.PHONY : TagStatic
 
 # fast build rule for target.
-PointList/fast:
-	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\PointList.dir\build.make Point/CMakeFiles/PointList.dir/build
-.PHONY : PointList/fast
+TagStatic/fast:
+	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagStatic.dir\build.make Point/CMakeFiles/TagStatic.dir/build
+.PHONY : TagStatic/fast
 
 main.obj: main.cpp.obj
 .PHONY : main.obj
@@ -186,8 +186,8 @@ help:
 	@echo ... depend
 	@echo ... edit_cache
 	@echo ... rebuild_cache
-	@echo ... Point
-	@echo ... PointList
+	@echo ... TagStatic
+	@echo ... TagUtility
 	@echo ... app
 	@echo ... main.obj
 	@echo ... main.i

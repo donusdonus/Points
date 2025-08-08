@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(mountkitExample)
+project(AppExample)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
@@ -47,7 +47,9 @@ add_executable(app main.cpp)
 # ✅ link libraries
 target_link_libraries(app
   PRIVATE
-  Point
-  PointList
+  TagStatic
+  TagUtility
+  #Point
+  #PointList
 #  freertos_kernel
 )

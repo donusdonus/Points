@@ -730,7 +730,6 @@ int Point::count(bool operate_node = false)
             counter++
     }
 
-
     return  counter ;
 }
 

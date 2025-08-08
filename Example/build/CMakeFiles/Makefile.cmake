@@ -62,6 +62,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/app.dir/DependInfo.cmake"
-  "Point/CMakeFiles/Point.dir/DependInfo.cmake"
-  "Point/CMakeFiles/PointList.dir/DependInfo.cmake"
+  "Point/CMakeFiles/TagUtility.dir/DependInfo.cmake"
+  "Point/CMakeFiles/TagStatic.dir/DependInfo.cmake"
   )
