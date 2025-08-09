@@ -116,6 +116,9 @@ struct Tag
     uint8_t external_alloc:8;
     isType type:8;        /**< Data type of the component */
 
+    Tag *next;
+    Tag *first;
+
     template<typename T>
     bool SetValue(T value,size_t index = 0)
     {
@@ -188,6 +191,46 @@ struct TagGroup
     Tag Item; 
     TagGroup *Next = nullptr;
     TagGroup *First = nullptr;
+
+    Tag * ItemAdd(Topic **src,isType type,const char * name,size_t array_size=1,isMemory memtype = isMemory::RAM)
+    {
+        TagGroup **cur = nullptr;
+
+        cur = &(*src)->Group;
+
+        /* 1. Find last elements for connect */
+        while ((cur != nullptr) && (*cur != nullptr))
+        {
+            cur = &(*cur)->Next;
+        }
+
+        TagGroup *newItem = (TagGroup*)Allocator(memtype,array_size,sizeof(TagGroup));
+        
+        monitor = (newItem != nullptr);
+        if(!monitor)
+            return nullptr;
+    
+        monitor = SetName(&newItem->Item.name,name,memtype);
+        if(!monitor)
+            return nullptr;
+
+        newItem->Item.data.value = (uint8_t*)Allocator(memtype,array_size,SchematicPoint[type].element_size);
+
+        monitor = (newItem->Item.data.value != nullptr);
+        if(!monitor)
+            return nullptr;
+
+        newItem->Item.data.size = SchematicPoint[type].element_size * array_size;
+        newItem->Item.memType = memtype;
+        newItem->Item.type = type;
+
+
+        *cur = newItem;
+        //(*cur)->Home = (*src)->Group;
+     
+
+        return nullptr;
+    }
 };
 
 #pragma pack(push,1)

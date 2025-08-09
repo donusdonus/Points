@@ -1,4 +1,4 @@
-CMakeFiles/app.dir/main.cpp.obj: C:\Project\Points\Example\main.cpp \
+CMakeFiles/app.dir/main.cpp.obj: D:\Points\Example\main.cpp \
  C:/msys64/mingw32/include/c++/15.1.0/iostream \
  C:/msys64/mingw32/include/c++/15.1.0/bits/requires_hosted.h \
  C:/msys64/mingw32/include/c++/15.1.0/i686-w64-mingw32/bits/c++config.h \
@@ -143,5 +143,5 @@ CMakeFiles/app.dir/main.cpp.obj: C:\Project\Points\Example\main.cpp \
  C:/msys64/mingw32/include/assert.h \
  C:/msys64/mingw32/include/c++/15.1.0/cstring \
  C:/msys64/mingw32/include/string.h \
- C:/msys64/mingw32/include/sec_api/string_s.h \
- C:/Project/Points/src/TagUtility.h C:/Project/Points/src/TagStatic.h
+ C:/msys64/mingw32/include/sec_api/string_s.h D:/Points/src/TagUtility.h \
+ D:/Points/src/TagStatic.h
