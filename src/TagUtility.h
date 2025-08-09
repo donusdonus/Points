@@ -285,6 +285,12 @@ public:
         return nullptr;
     }
 
+    bool ItemRemoveByIndex(Topic **src,size_t index)
+    {
+        TagGroup **cur = &(*src)->Group;
+
+    }
+
 #pragma endregion
 
 #pragma region "Tag function"

@@ -116,7 +116,7 @@ struct Tag
     uint8_t external_alloc:8;
     isType type:8;        /**< Data type of the component */
 
-    Tag *next = nullptr; 
+    Tag *next = nullptr;
     Tag *first = nullptr;
 
     template<typename T>
@@ -171,7 +171,7 @@ struct Tag
     const char * MonitorInfo()
     {
         size_t out = 0;
-        out = sprintf(&PrintOut[0],"  %s %s[%d]\n",SchematicPoint[type].name,name.value,GetArraySize()+1);
+        out = sprintf(&PrintOut[0],"  %s %s[%d]\n",SchematicPoint[type].name,name.value,GetArraySize());
         return &PrintOut[0];
     }
 
@@ -184,17 +184,36 @@ struct Tag
         return &PrintOut[0];
     }
 
+    /* return nextag */
+    Tag * Free()
+    {
+        if(name.value != nullptr)
+            free(name.value);
+
+        if((data.value != nullptr) && (external_alloc == 0))
+            free(name.value);
+        
+        first = nullptr;
+        next = nullptr;
+    }
 };
 #pragma pack(pop)
+
+struct TagGroup
+{
+    Tag *Item; 
+
+    void 
+};
 
 #pragma pack(push,1)
 struct Topic
 {
     RawMemory name;       /**< Name of the group */
     isMemory memType;
-    Tag *Tags;
-    Topic *next = nullptr ;      /**< Pointer to the first component in the list */
-    Topic *first = nullptr ;       /**< Pointer to the home component in the list */
+    TagGroup * Group = nullptr;
+    Topic *Home = nullptr ;      /**< Pointer to the first component in the list */
+    Topic *Next = nullptr ;       /**< Pointer to the home component in the list */
 
     const char * MonitorInfo()
     {
