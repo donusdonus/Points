@@ -110,100 +110,210 @@ PrintPointData static FuncPrintValue[]   = {
 #pragma pack(push,1)
 struct Tag
 {
-    RawMemory name;       /**< Name of the component */
-    RawMemory data;       /**< Data buffer for the component */
-    isMemory memType:8;  /**< Memory type for the component */
-    uint8_t external_alloc:8;
-    isType type:8;        /**< Data type of the component */
+    public:
+        RawMemory _name;       /**< Name of the component */
+        RawMemory _data;       /**< Data buffer for the component */
+        isMemory _memType:8;  /**< Memory type for the component */
+        uint8_t _external_alloc:8;
+        isType _type:8;        /**< Data type of the component */
 
-    Tag *next = nullptr;
-    Tag *first = nullptr;
+        Tag *_next = nullptr;
+        Tag *_first = nullptr;
 
-    template<typename T>
-    bool SetValue(T value,size_t index = 0)
-    {
-        bool monitor;
-        size_t a , b ;
+        template<typename T>
+        bool Set(T value,size_t index = 0)
+        {
+            bool monitor;
+            size_t a , b ;
 
-        a = sizeof(T);
-        b = SchematicPoint[type].element_size;
+            a = sizeof(T);
+            b = SchematicPoint[_type].element_size;
 
-        /* Check Elements Per Size is equal */
-        monitor = (a == b);
-        if(!monitor)
-            return !monitor;
+            /* Check Elements Per Size is equal */
+            monitor = (a == b);
+            if(!monitor)
+                return !monitor;
 
-        /* Check is not over index */
-        monitor = ((data.size / SchematicPoint[type].element_size) < index);
-        if(monitor)
+            /* Check is not over index */
+            monitor = ((_data.size / SchematicPoint[_type].element_size) < index);
+            if(monitor)
+                return monitor;
+            
+            T *tmp = (T*)_data.value; 
+
+            tmp[index] = value;
+
+            return true ;
+        }
+
+        template<typename T>
+        T Get(size_t index = 0)
+        {
+            bool monitor;
+
+            monitor = (sizeof(T) == SchematicPoint[_type].element_size);
+            if(!monitor)
+                return T{};
+
+            monitor = (GetArraySize() < index);
+            if(monitor)
+                return T{};
+            
+            T *tmp = (T*)_data.value; 
+
+            return tmp[index];
+        }
+
+        size_t GetArraySize()
+        {
+            return  _data.size / SchematicPoint[_type].element_size ;
+        }
+
+        const char * MonitorInfo()
+        {
+            size_t out = 0;
+            out = sprintf(&PrintOut[0],"  %s %s[%d]\n",SchematicPoint[_type].name,_name.value,GetArraySize());
+            return &PrintOut[0];
+        }
+
+        const char * MonitorValue(size_t index)
+        {
+            size_t cur = 0;
+            cur = sprintf(PrintOut,"    %s[%d] = ",_name.value,index);
+            cur += FuncPrintValue[_type](cur,_data.value,index);
+            cur += sprintf(&PrintOut[cur],"\n");
+            return &PrintOut[0];
+        }
+
+        bool SetName(const char *name)
+        {
+            bool monitor;
+
+            monitor = (_name.value != nullptr);
+            if(monitor)
+            {
+                free(_name.value);
+                _name.value = nullptr;
+            }
+
+            _name.size = strlen(name) + 1;
+            
+            _name.value = (uint8_t*)Allocator(_memType,_name.size,sizeof(uint8_t));
+            monitor = (_name.value != nullptr);
+            if(monitor)
+                return !monitor;
+
+            memcpy(_name.value,name,_name.size-1);
+            _name.value[_name.size-1] = MARK_CHAR_NULL;
+
             return monitor;
-        
-        T *tmp = (T*)data.value; 
+        }
 
-        tmp[index] = value;
+        void Free()
+        {
+            if(_name.value != nullptr)
+                free(_name.value);
 
-        return true ;
-    }
-
-    template<typename T>
-    T GetValue(size_t index = 0)
-    {
-        bool monitor;
-
-        monitor = (sizeof(T) == SchematicPoint[type].element_size);
-        if(!monitor)
-            return T{};
-
-        monitor = (GetArraySize() < index);
-        if(monitor)
-            return T{};
-        
-        T *tmp = (T*)data.value; 
-
-        return tmp[index];
-    }
-
-    size_t GetArraySize()
-    {
-        return  data.size / SchematicPoint[type].element_size ;
-    }
-
-    const char * MonitorInfo()
-    {
-        size_t out = 0;
-        out = sprintf(&PrintOut[0],"  %s %s[%d]\n",SchematicPoint[type].name,name.value,GetArraySize());
-        return &PrintOut[0];
-    }
-
-    const char * MonitorValue(size_t index)
-    {
-        size_t cur = 0;
-        cur = sprintf(PrintOut,"    %s[%d] = ",name.value,index);
-        cur += FuncPrintValue[type](cur,data.value,index);
-        cur += sprintf(&PrintOut[cur],"\n");
-        return &PrintOut[0];
-    }
-
-    /* return nextag */
-    Tag * Free()
-    {
-        if(name.value != nullptr)
-            free(name.value);
-
-        if((data.value != nullptr) && (external_alloc == 0))
-            free(name.value);
-        
-        first = nullptr;
-        next = nullptr;
-    }
+            if((_data.value != nullptr) && (_external_alloc == 0))
+                free(_name.value);
+            
+            _first = nullptr;
+            _next = nullptr;
+        }
 };
 #pragma pack(pop)
 
-struct TagGroup
+struct TagGroup : Tag
 {
-    Tag *Item; 
+    private:
+        Tag *_Item = nullptr ; 
 
-    void 
+    public:
+        Tag * Add(isType type,const char * name,size_t array_size=1,isMemory memtype = isMemory::RAM)
+        {
+            bool monitor;
+            Tag **cur = &_Item;
+            Tag **cur_first = &_Item;
+
+            /* 1. Find last elements for connect */
+            while ((cur != nullptr) && (*cur != nullptr))
+            {
+                cur = &(*cur)->_next;
+            }
+
+            Tag *newItem = (Tag*)Allocator(memtype,array_size,sizeof(Tag));
+
+            monitor = (newItem != nullptr);
+            if(!monitor)
+            return nullptr;
+
+            newItem->_data.size = SchematicPoint[type].element_size * array_size;
+            newItem->_memType = memtype;
+            newItem->_type = type;
+
+            monitor = newItem->SetName(name);
+            if(!monitor)
+            return nullptr;
+
+            newItem->_data.value = (uint8_t*)Allocator(memtype,array_size,SchematicPoint[type].element_size);
+
+            monitor = (newItem->_data.value != nullptr);
+            if(!monitor)
+            return nullptr;
+
+            *cur = newItem;
+            (*cur)->_first = (*cur_first);
+
+            return *cur;
+        }
+
+
+
+
+        Tag * Add(isType type,const char * name,void *addr,size_t array_size=1,isMemory memtype = isMemory::RAM)
+        {
+            bool monitor;
+            Tag **cur = &_Item;
+            Tag **cur_first = &_Item;
+
+            /* 1. Find last elements for connect */
+            while ((cur != nullptr) && (*cur != nullptr))
+            {
+                cur = &(*cur)->_next;
+            }
+
+            Tag *newItem = (Tag*)Allocator(memtype,array_size,sizeof(Tag));
+
+            monitor = (newItem != nullptr);
+            if(!monitor)
+            return nullptr;
+
+            newItem->_data.size = SchematicPoint[type].element_size * array_size;
+            newItem->_memType = memtype;
+            newItem->_type = type;
+
+            monitor = newItem->SetName(name);
+            if(!monitor)
+            return nullptr;
+
+            newItem->_data.value = (uint8_t*)addr;
+
+            monitor = (newItem->_data.value != nullptr);
+            if(!monitor)
+            return nullptr;
+
+            *cur = newItem;
+            (*cur)->_first = (*cur_first);
+
+            return *cur;
+        }
+
+        bool Remove(size_t index);
+        void Remove(const char * name);
+        size_t Count()
+        {
+            
+        }
 };
 
 #pragma pack(push,1)
