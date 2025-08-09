@@ -116,8 +116,8 @@ struct Tag
     uint8_t external_alloc:8;
     isType type:8;        /**< Data type of the component */
 
-    Tag *next;
-    Tag *first;
+    Tag *next = nullptr; 
+    Tag *first = nullptr;
 
     template<typename T>
     bool SetValue(T value,size_t index = 0)
@@ -183,64 +183,18 @@ struct Tag
         cur += sprintf(&PrintOut[cur],"\n");
         return &PrintOut[0];
     }
+
 };
 #pragma pack(pop)
-
-struct TagGroup
-{
-    Tag Item; 
-    TagGroup *Next = nullptr;
-    TagGroup *First = nullptr;
-
-    Tag * ItemAdd(Topic **src,isType type,const char * name,size_t array_size=1,isMemory memtype = isMemory::RAM)
-    {
-        TagGroup **cur = nullptr;
-
-        cur = &(*src)->Group;
-
-        /* 1. Find last elements for connect */
-        while ((cur != nullptr) && (*cur != nullptr))
-        {
-            cur = &(*cur)->Next;
-        }
-
-        TagGroup *newItem = (TagGroup*)Allocator(memtype,array_size,sizeof(TagGroup));
-        
-        monitor = (newItem != nullptr);
-        if(!monitor)
-            return nullptr;
-    
-        monitor = SetName(&newItem->Item.name,name,memtype);
-        if(!monitor)
-            return nullptr;
-
-        newItem->Item.data.value = (uint8_t*)Allocator(memtype,array_size,SchematicPoint[type].element_size);
-
-        monitor = (newItem->Item.data.value != nullptr);
-        if(!monitor)
-            return nullptr;
-
-        newItem->Item.data.size = SchematicPoint[type].element_size * array_size;
-        newItem->Item.memType = memtype;
-        newItem->Item.type = type;
-
-
-        *cur = newItem;
-        //(*cur)->Home = (*src)->Group;
-     
-
-        return nullptr;
-    }
-};
 
 #pragma pack(push,1)
 struct Topic
 {
     RawMemory name;       /**< Name of the group */
     isMemory memType;
-    TagGroup * Group = nullptr;
-    Topic *Home = nullptr ;      /**< Pointer to the first component in the list */
-    Topic *Next = nullptr ;       /**< Pointer to the home component in the list */
+    Tag *Tags;
+    Topic *next = nullptr ;      /**< Pointer to the first component in the list */
+    Topic *first = nullptr ;       /**< Pointer to the home component in the list */
 
     const char * MonitorInfo()
     {
