@@ -131,20 +131,39 @@ PrintPointData static FuncPrintValue[]   = {
                                        &DISP_DOUBLE
                                    };
 
+union isOption
+{
+    uint8_t data;
+    struct 
+    {
+        isType _type : 4;
+        isMemory _memType : 2;
+        uint8_t _external_alloc : 1;
+        uint8_t _mark : 1;
+    };
+};
+
+
 #pragma pack(push,1)
 struct Tag
 {
     public:
+        
+        isOption _option;
         RawMemory _name;       /**< Name of the component */
         RawMemory _data;       /**< Data buffer for the component */
 
         Tag *_next = nullptr;
         Tag *_first = nullptr;
 
-        isMemory _memType:8;  /**< Memory type for the component */
-        uint8_t _external_alloc:8;
-        isType _type:8;        /**< Data type of the component */
-
+        size_t GetObjectByteSize()
+        {
+            return  1 +  // _option
+                    1 +  // _len_of_name
+                    _name.size + // byte name data
+                    4 ; // byte size of data
+                    _data.size ; // byte data
+        }
 
         template<typename T>
         bool Set(T value,size_t index = 0)
@@ -153,7 +172,7 @@ struct Tag
             size_t a , b ;
 
             a = sizeof(T);
-            b = SchematicPoint[_type].element_size;
+            b = SchematicPoint[_option._type].element_size;
 
             /* Check Elements Per Size is equal */
             monitor = (a == b);
@@ -178,7 +197,7 @@ struct Tag
         {
             bool monitor;
 
-            monitor = (sizeof(T) == SchematicPoint[_type].element_size);
+            monitor = (sizeof(T) == SchematicPoint[_option._type].element_size);
             if(!monitor)
                 return T{};
 
@@ -193,13 +212,16 @@ struct Tag
 
         size_t GetArraySize()
         {
-            return  _data.size / SchematicPoint[_type].element_size ;
+            return  _data.size / SchematicPoint[_option._type].element_size ;
         }
 
-        const char * MonitorInfo()
+        const char * MonitorInfo(bool include_bytesize = false)
         {
             size_t out = 0;
-            out = sprintf(&PrintOut[0],"  %s %s[%d]\n",SchematicPoint[_type].name,_name.value,GetArraySize());
+            out = sprintf(&PrintOut[0],"  %s %s[%d] ",SchematicPoint[_option._type].name,_name.value,GetArraySize());
+            if(include_bytesize)
+                out += sprintf(&PrintOut[out]," size %d bytes.",GetObjectByteSize());
+            out += sprintf(&PrintOut[out],"\n");
             return &PrintOut[0];
         }
 
@@ -207,7 +229,7 @@ struct Tag
         {
             size_t cur = 0;
             cur = sprintf(PrintOut,"    %s[%d] = ",_name.value,index);
-            cur += FuncPrintValue[_type](cur,_data.value,index);
+            cur += FuncPrintValue[_option._type](cur,_data.value,index);
             cur += sprintf(&PrintOut[cur],"\n");
             return &PrintOut[0];
         }
@@ -225,7 +247,7 @@ struct Tag
 
             _name.size = strlen(name) + 1;
             
-            _name.value = (uint8_t*)Allocator(_memType,_name.size,sizeof(uint8_t));
+            _name.value = (uint8_t*)Allocator(_option._memType,_name.size,sizeof(uint8_t));
             monitor = (_name.value == nullptr);
             if(monitor)
                 return !monitor;
@@ -250,7 +272,7 @@ struct Tag
                 free(_name.value);
             }
 
-            if((_data.value != nullptr) && (_external_alloc == 0))
+            if((_data.value != nullptr) && (_option._external_alloc == 0))
             {
                 //memset(_data.value,MARK_FREE_MEMORY,_data.size);
                 //memset((uint8_t*)&_data.size,MARK_FREE_MEMORY,sizeof(_data.size));
@@ -264,24 +286,28 @@ struct Tag
             _first = nullptr;
             _next = nullptr;
         }
-};
+
+        RawMemory * GetRawBuffer()
+        {
+            return &_data;
+        }
+        
+    };
 #pragma pack(pop)
 
 struct TagGroup
 {
-    private:
+
         Tag *_Item = nullptr ; 
 
-    public:
         Tag * Add(isType type,const char * name,size_t array_size=1,isMemory memtype = isMemory::RAM)
         {
-
             if(array_size == 0) 
                 return nullptr;
 
             bool monitor;
-            Tag **cur = &_Item;
-            Tag **cur_first = &_Item;
+            Tag **cur = &this->_Item;
+            Tag **cur_first = &this->_Item;
 
             /* 1. Find last elements for connect */
             while ((cur != nullptr) && (*cur != nullptr))
@@ -299,8 +325,8 @@ struct TagGroup
             newItem->_data.size = 0;
 
             newItem->_data.size = SchematicPoint[type].element_size * array_size;
-            newItem->_memType = memtype;
-            newItem->_type = type;
+            newItem->_option._memType = memtype;
+            newItem->_option._type = type;
 
             monitor = newItem->SetName(name);
             if(!monitor)
@@ -313,7 +339,8 @@ struct TagGroup
             return nullptr;
 
             *cur = newItem;
-            (*cur)->_first = (*cur_first);
+            if(cur_first != nullptr)
+                (*cur)->_first = (*cur_first);
 
             return *cur;
         }
@@ -343,8 +370,8 @@ struct TagGroup
             newItem->_data.size = 0;
 
             newItem->_data.size = SchematicPoint[type].element_size * array_size;
-            newItem->_memType = memtype;
-            newItem->_type = type;
+            newItem->_option._memType = memtype;
+            newItem->_option._type = type;
 
             monitor = newItem->SetName(name);
             if(!monitor)
@@ -494,15 +521,27 @@ struct TagGroup
 struct Topic
 {
     RawMemory _name;       /**< Name of the group */
-    isMemory _memType;
+    isOption _option;
     TagGroup * _group = nullptr;
     Topic *_first = nullptr;
     Topic *_next = nullptr;
 
-    const char * MonitorInfo()
+
+    size_t GetObjectByteSize()
+    {
+            return  1 +  // IsOption 
+                    1 +  // _len_of_name
+                    _name.size; // byte name data
+    }
+
+    const char * MonitorInfo(bool include_bytesize = false)
     {
         size_t out = 0;
-        out = sprintf(&PrintOut[0],"TOPIC %s\n",_name.value);
+        out = sprintf(&PrintOut[0],"TOPIC %s",_name.value);
+        if(include_bytesize)
+            out += sprintf(&PrintOut[out]," size %d bytes.",GetObjectByteSize());
+        out += sprintf(&PrintOut[out],"\n");
+        
         return &PrintOut[0];
     }
   
@@ -524,7 +563,7 @@ struct Topic
 
         _name.size = strlen(name) + 1;
         
-        _name.value = (uint8_t*)Allocator(_memType,_name.size,sizeof(uint8_t));
+        _name.value = (uint8_t*)Allocator(_option._memType,_name.size,sizeof(uint8_t));
         monitor = (_name.value != nullptr);
         if(!monitor)
             return false;
@@ -563,6 +602,7 @@ struct Topic
         return _group;
     }
 
+
 };
 #pragma pack(pop)
 
@@ -573,8 +613,6 @@ struct TopicGroup
     
         Topic * Add(const char * name,isMemory memtype = isMemory::RAM)
         {
-        
-
             bool monitor;
             Topic **cur = &_Topics;
             Topic **cur_first = &_Topics;
@@ -591,9 +629,9 @@ struct TopicGroup
             if(!monitor)
             return nullptr;
 
-            newTopic->_memType = memtype;
-            newTopic->_group = nullptr;
-        
+            newTopic->_option._memType = memtype;
+            newTopic->_group = (TagGroup*)calloc(1,sizeof(TagGroup));
+         
             monitor = newTopic->SetName(name);
             if(!monitor)
             return nullptr;
