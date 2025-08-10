@@ -53,10 +53,10 @@ RM = C:\msys64\mingw32\bin\cmake.exe -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = D:\Points\Example
+CMAKE_SOURCE_DIR = C:\Project\Points\Example
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = D:\Points\Example\build
+CMAKE_BINARY_DIR = C:\Project\Points\Example\build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -110,14 +110,14 @@ CMakeFiles/app.dir/all: Point/CMakeFiles/TagUtility.dir/all
 CMakeFiles/app.dir/all: Point/CMakeFiles/TagStatic.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=5,6 "Built target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=5,6 "Built target app"
 .PHONY : CMakeFiles/app.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/app.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/app.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 0
 .PHONY : CMakeFiles/app.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ app: CMakeFiles/app.dir/rule
 # codegen rule for target.
 CMakeFiles/app.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\app.dir\build.make CMakeFiles/app.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=5,6 "Finished codegen for target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=5,6 "Finished codegen for target app"
 .PHONY : CMakeFiles/app.dir/codegen
 
 # clean rule for target.
@@ -142,14 +142,14 @@ CMakeFiles/app.dir/clean:
 Point/CMakeFiles/TagUtility.dir/all:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagUtility.dir\build.make Point/CMakeFiles/TagUtility.dir/depend
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagUtility.dir\build.make Point/CMakeFiles/TagUtility.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=3,4 "Built target TagUtility"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Built target TagUtility"
 .PHONY : Point/CMakeFiles/TagUtility.dir/all
 
 # Build rule for subdir invocation for target.
 Point/CMakeFiles/TagUtility.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Point/CMakeFiles/TagUtility.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 0
 .PHONY : Point/CMakeFiles/TagUtility.dir/rule
 
 # Convenience name for target.
@@ -159,7 +159,7 @@ TagUtility: Point/CMakeFiles/TagUtility.dir/rule
 # codegen rule for target.
 Point/CMakeFiles/TagUtility.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagUtility.dir\build.make Point/CMakeFiles/TagUtility.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=3,4 "Finished codegen for target TagUtility"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=3,4 "Finished codegen for target TagUtility"
 .PHONY : Point/CMakeFiles/TagUtility.dir/codegen
 
 # clean rule for target.
@@ -174,14 +174,14 @@ Point/CMakeFiles/TagUtility.dir/clean:
 Point/CMakeFiles/TagStatic.dir/all:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagStatic.dir\build.make Point/CMakeFiles/TagStatic.dir/depend
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagStatic.dir\build.make Point/CMakeFiles/TagStatic.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=1,2 "Built target TagStatic"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=1,2 "Built target TagStatic"
 .PHONY : Point/CMakeFiles/TagStatic.dir/all
 
 # Build rule for subdir invocation for target.
 Point/CMakeFiles/TagStatic.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 Point/CMakeFiles/TagStatic.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start D:\Points\Example\build\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Project\Points\Example\build\CMakeFiles 0
 .PHONY : Point/CMakeFiles/TagStatic.dir/rule
 
 # Convenience name for target.
@@ -191,7 +191,7 @@ TagStatic: Point/CMakeFiles/TagStatic.dir/rule
 # codegen rule for target.
 Point/CMakeFiles/TagStatic.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f Point\CMakeFiles\TagStatic.dir\build.make Point/CMakeFiles/TagStatic.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=D:\Points\Example\build\CMakeFiles --progress-num=1,2 "Finished codegen for target TagStatic"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Project\Points\Example\build\CMakeFiles --progress-num=1,2 "Finished codegen for target TagStatic"
 .PHONY : Point/CMakeFiles/TagStatic.dir/codegen
 
 # clean rule for target.

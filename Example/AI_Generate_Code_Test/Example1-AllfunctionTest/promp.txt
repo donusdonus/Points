@@ -1,0 +1,13 @@
+ทำ main.cpp 
+1. สำหรับการ test ทุก Struct และ function 
+2. มีการแจ้งผ่าน printf ทุก step ว่าทำอะไร OK หรือ NG
+3. มีหัวข้อแจ้งว่าจะ test อะไร
+4. มีการสรปคะแนนหัวข้อที่ทดสอบ xx/100
+5. ทดสอบทุกกรณีที่ยอมรับการส่ง parameter เข้าไป
+ุ6. อ่างอิง C++11 ไม่มากไปกว่านั้น
+ึ7. ห้ามเรียก Variable Propertie instruct ให้เรียก function ใน struct เท่านั้น
+8. กรณีของ pointer opand จะใช้ nullptr ห้ามใช้ NULL หรือ null
+9. Code Test ต้องมี Standard
+10. Comment เป็นภาษา อังกฤษ
+11. Code Test Style Misra
+12. มีการ test หน่วยความจำเป็น Add หรือ Remove มีการคืนหน่วยความจำที่ถูกต้อง
