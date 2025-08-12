@@ -181,8 +181,7 @@ MIT License — You are free to use, modify, and distribute this library with at
 ---
 
 ## 8. Future Plans
-
-- Add **JSON import/export** for tag structures.
+- Working with **Data Memory** from source allocate.
 - Support **protocol binding** (OPC UA, MQTT, BACnet).
-- Implement **thread-safe operations**.
-- Provide **WebSocket/HTTP** interface for remote monitoring.
+- Implement **thread-safe operations FreeRTOS**.
+
