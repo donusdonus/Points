@@ -96,15 +96,15 @@ struct TypeInfo {
 
 static const TypeInfo SchematicPoint[] = 
 {
-    {"CHAR\0"  , sizeof(char)     },   /**< Character type */
-    {"INT8\0"  , sizeof(int8_t)   },   /**< 8-bit signed integer */
-    {"UINT8\0" , sizeof(uint8_t)  },   /**< 8-bit unsigned integer */
-    {"INT16\0" , sizeof(int16_t)  },   /**< 16-bit signed integer */
-    {"UINT16\0", sizeof(uint16_t) },   /**< 16-bit unsigned integer */
-    {"INT32\0" , sizeof(int32_t)  },   /**< 32-bit signed integer */
-    {"UINT32\0", sizeof(uint32_t) },   /**< 32-bit unsigned integer */
-    {"FLOAT\0" , sizeof(float)    },   /**< Single precision float */
-    {"DOUBLE\0", sizeof(double)   }    /**< Double precision float */
+    {"char\0"  , sizeof(char)     },   /**< Character type */
+    {"int8_t\0"  , sizeof(int8_t)   },   /**< 8-bit signed integer */
+    {"uint8_t\0" , sizeof(uint8_t)  },   /**< 8-bit unsigned integer */
+    {"int16_t\0" , sizeof(int16_t)  },   /**< 16-bit signed integer */
+    {"uint16_t\0", sizeof(uint16_t) },   /**< 16-bit unsigned integer */
+    {"int32_t\0" , sizeof(int32_t)  },   /**< 32-bit signed integer */
+    {"uint32_t\0", sizeof(uint32_t) },   /**< 32-bit unsigned integer */
+    {"float\0" , sizeof(float)    },   /**< Single precision float */
+    {"double\0", sizeof(double)   }    /**< Double precision float */
 };
 
 static char PrintOut[MAX_BUFFER_PRINT];
@@ -406,7 +406,7 @@ struct TagGroup
             return nullptr;
         }
 
-        Tag * Find(size_t index)
+        Tag * FindByIndex(size_t index)
         {
             bool monitor;
             size_t count = 0;
